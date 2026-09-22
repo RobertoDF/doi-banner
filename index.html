@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOI Banner — paper citation banners for slides</title>
+<meta name="description" content="Paste a DOI, get a transparent citation banner for your slides. PNG and SVG, no server, no tracking.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <h1>DOI&thinsp;<span>Banner</span></h1>
+  <p>Paste a DOI. Get a transparent citation banner for your slides.</p>
+</header>
+
+<main>
+  <form id="lookup" class="lookup" autocomplete="off">
+    <label class="sr-only" for="doi">DOI</label>
+    <input id="doi" name="doi" type="text" spellcheck="false" autocomplete="off"
+           placeholder="10.1038/s41592-024-02318-2  ·  or a doi.org URL">
+    <button type="submit" id="go">Fetch</button>
+  </form>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <section class="stage-wrap">
+    <div class="stage" id="stage" data-bg="dark">
+      <canvas id="preview"></canvas>
+    </div>
+    <div class="stage-bar">
+      <div class="seg" role="group" aria-label="Preview background">
+        <button type="button" data-bg="checker">Transparent</button>
+        <button type="button" data-bg="dark" class="on">Dark</button>
+        <button type="button" data-bg="light">Light</button>
+      </div>
+      <span class="dims" id="dims"></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="ctl">
+      <label for="preset">Shape</label>
+      <select id="preset">
+        <option value="card" selected>Card — 1800×500</option>
+      <option value="strip">Footer strip — 2400×140</option>
+    </select>
+    </div>
+
+    <div class="ctl">
+      <label for="theme">Text</label>
+      <select id="theme">
+        <option value="light" selected>White — for dark slides</option>
+        <option value="dark">Near-black — for light slides</option>
+      </select>
+    </div>
+
+    <div class="ctl">
+      <label for="typeface">Typeface</label>
+      <select id="typeface">
+        <option value="sans" selected>Humanist sans</option>
+        <option value="serif">Serif</option>
+        <option value="grotesk">Neo-grotesque</option>
+      </select>
+    </div>
+
+    <div class="ctl">
+      <label for="accent">Accent</label>
+      <div class="swatches" id="swatches"></div>
+      <input type="color" id="accent" value="#4B8E8D">
+    </div>
+
+    <div class="ctl checks">
+      <label class="chk"><input type="checkbox" id="showQr" checked> QR to DOI</label>
+      <label class="chk"><input type="checkbox" id="qrPlate"> QR on white plate</label>
+      <label class="chk"><input type="checkbox" id="showRule" checked> Accent rule</label>
+      <label class="chk"><input type="checkbox" id="showDoi" checked> DOI line</label>
+    </div>
+  </section>
+
+  <details class="fields" id="fields">
+    <summary>Edit text</summary>
+    <div class="grid">
+      <label>Title <input type="text" autocomplete="off" id="f-title"></label>
+      <label>Authors <input type="text" autocomplete="off" id="f-authors" placeholder="Weinreb, Pearl, Lin"></label>
+      <label>Journal <input type="text" autocomplete="off" id="f-journal"></label>
+      <label>Year <input type="text" autocomplete="off" id="f-year"></label>
+      <label>Volume <input type="text" autocomplete="off" id="f-volume"></label>
+      <label>Pages <input type="text" autocomplete="off" id="f-pages"></label>
+      <label class="wide">DOI <input type="text" autocomplete="off" id="f-doi"></label>
+    </div>
+  </details>
+
+  <section class="actions">
+    <div class="ctl inline">
+      <label for="scale">PNG scale</label>
+      <select id="scale">
+        <option value="1">1× </option>
+        <option value="2" selected>2×</option>
+        <option value="3">3×</option>
+      </select>
+    </div>
+    <button type="button" id="dlPng" class="primary">Download PNG</button>
+    <button type="button" id="dlSvg">Download SVG</button>
+    <button type="button" id="copyCite">Copy citation</button>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Metadata from <a href="https://www.crossref.org/">Crossref</a> and <a href="https://datacite.org/">DataCite</a>.
+     Everything runs in your browser — nothing is uploaded.</p>
+  <p><a href="https://github.com/RobertoDF/doi-banner">Source on GitHub</a> · MIT</p>
+</footer>
+
+<script src="vendor/qrcode.js"></script>
+<script src="js/meta.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
