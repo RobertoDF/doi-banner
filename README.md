@@ -4,6 +4,13 @@ Paste a DOI, get a transparent citation banner for your slides.
 
 **→ https://robertodf.github.io/doi-banner/**
 
+![Card banner for Keypoint-MoSeq, Nature Methods 2024](docs/example-card.png)
+
+![Footer strip for the same paper](docs/example-strip.png)
+
+*Both generated from `10.1038/s41592-024-02318-2`, shown here on a dark plate —
+the exported PNGs have a fully transparent background.*
+
 Built for talks: instead of pasting a screenshot of a paper's title page, drop a
 clean banner with the title, first authors, journal, year and a QR code that
 links straight to the DOI.
