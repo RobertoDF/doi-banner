@@ -6,7 +6,7 @@
 const Layout = (() => {
 
   const PRESETS = {
-    card:  { w: 1800, h: 500,  mode: 'stack', maxLines: 3 },
+    card:  { w: 1800, h: 0,    mode: 'stack', maxLines: 3 },
     strip: { w: 2400, h: 140,  mode: 'strip', maxLines: 1 }
   };
 
@@ -136,13 +136,14 @@ const Layout = (() => {
   }
 
   function buildStack(m, opt, s) {
-    const { W, H, family, ink, dim, prims } = s;
+    const { W, family, ink, dim, prims } = s;
     const padX = Math.round(W * 0.036);
+    const padY = Math.round(W * 0.026);
     const ruleW = opt.showRule ? Math.max(4, Math.round(W * 0.0034)) : 0;
     const ruleGap = opt.showRule ? Math.round(W * 0.024) : 0;
 
     const qrOn = opt.showQr && m.doi;
-    const qrSize = qrOn ? Math.round(Math.min(H * 0.40, W * 0.115)) : 0;
+    const qrSize = qrOn ? Math.round(W * 0.105) : 0;
     const platePad = qrOn && opt.qrPlate ? Math.round(qrSize * 0.10) : 0;
     const qrBox = qrSize + platePad * 2;
     const qrGap = qrOn ? Math.round(W * 0.030) : 0;
@@ -154,8 +155,8 @@ const Layout = (() => {
     const mRuns = metaRuns(m, dim);
     const doiText = opt.showDoi && m.doi ? 'doi.org/' + m.doi : '';
 
-    // Shrink the type until the block fits both the line budget and the height.
-    let titleSize = Math.round(Math.min(H * 0.115, W * 0.042));
+    // Shrink the type until the title fits the line budget.
+    let titleSize = Math.round(W * 0.040);
     let lines, metaSize, doiSize, blockH;
     const minSize = titleSize * 0.55;
 
@@ -164,18 +165,19 @@ const Layout = (() => {
       doiSize = Math.round(titleSize * 0.36);
       lines = wrapRuns(tRuns, titleSize, family, textW);
 
-      const titleH = lines.length * titleSize * 1.20;
-      const metaH = mRuns.length ? metaSize * 1.45 : 0;
-      const doiH = doiText ? doiSize * 1.5 : 0;
-      const gap1 = mRuns.length ? Math.round(titleSize * 0.40) : 0;
-      const gap2 = doiText ? Math.round(titleSize * 0.20) : 0;
+      const titleH = lines.length * titleSize * 1.18;
+      const metaH = mRuns.length ? metaSize * 1.40 : 0;
+      const doiH = doiText ? doiSize * 1.45 : 0;
+      const gap1 = mRuns.length ? Math.round(titleSize * 0.34) : 0;
+      const gap2 = doiText ? Math.round(titleSize * 0.16) : 0;
       blockH = titleH + gap1 + metaH + gap2 + doiH;
 
-      const fitsLines = lines.length <= s.maxLines;
-      const fitsHeight = blockH <= H - Math.round(H * 0.14);
-      if ((fitsLines && fitsHeight) || titleSize <= minSize) break;
+      if (lines.length <= s.maxLines || titleSize <= minSize) break;
       titleSize = Math.round(titleSize * 0.93);
     }
+
+    // The card is only as tall as what it holds — no dead space top or bottom.
+    const H = Math.round(Math.max(blockH, qrOn ? qrBox : 0) + padY * 2);
 
     let y = Math.round((H - blockH) / 2);
     const blockTop = y;
@@ -192,12 +194,12 @@ const Layout = (() => {
         });
         x += measure(run, titleSize, family);
       });
-      y += titleSize * 1.20;
+      y += titleSize * 1.18;
     });
 
     // meta
     if (mRuns.length) {
-      y += Math.round(titleSize * 0.40);
+      y += Math.round(titleSize * 0.34);
       let x = textX;
       const baseline = y + metaSize * 0.92;
       mRuns.forEach(run => {
@@ -208,18 +210,18 @@ const Layout = (() => {
         });
         x += measure(run, metaSize, family);
       });
-      y += metaSize * 1.45;
+      y += metaSize * 1.40;
     }
 
     // doi
     if (doiText) {
-      y += Math.round(titleSize * 0.20);
+      y += Math.round(titleSize * 0.16);
       prims.push({
         t: 'text', x: textX, y: y + doiSize * 0.92, size: doiSize, family,
         weight: 400, italic: false, mono: true,
         fill: ink, opacity: 0.58, text: doiText
       });
-      y += doiSize * 1.5;
+      y += doiSize * 1.45;
     }
 
     const blockBottom = y;
