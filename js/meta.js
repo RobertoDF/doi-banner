@@ -17,15 +17,45 @@ const Meta = (() => {
     return r.json();
   }
 
+  /* Crossref ships JATS markup and HTML-escaped text: a title can arrive as
+     "Ca<sub>2+</sub> waves" and a journal as "Neuroscience &amp; Biobehavioral
+     Reviews". Strip the tags, then decode the entities. */
+  const ENTITIES = {
+    amp: '&', lt: '<', gt: '>', quot: '"', apos: '\u2019', nbsp: ' ',
+    ndash: '\u2013', mdash: '\u2014', hellip: '\u2026', middot: '\u00b7',
+    lsquo: '\u2018', rsquo: '\u2019', ldquo: '\u201c', rdquo: '\u201d',
+    times: '\u00d7', deg: '\u00b0', plusmn: '\u00b1', micro: '\u00b5',
+    alpha: '\u03b1', beta: '\u03b2', gamma: '\u03b3', delta: '\u03b4',
+    kappa: '\u03ba', lambda: '\u03bb', mu: '\u03bc', sigma: '\u03c3', omega: '\u03c9'
+  };
+
+  function clean(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/<[^>]*>/g, '')
+      .replace(/&#x([0-9a-f]+);/gi, (m, h) => codePoint(parseInt(h, 16), m))
+      .replace(/&#(\d+);/g, (m, d) => codePoint(parseInt(d, 10), m))
+      .replace(/&([a-z]+\d?);/gi, (m, name) => {
+        const hit = ENTITIES[name.toLowerCase()];
+        return hit != null ? hit : m;
+      })
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function codePoint(n, fallback) {
+    try { return String.fromCodePoint(n); } catch (e) { return fallback; }
+  }
+
   function firstString(v) {
-    if (Array.isArray(v)) return v.length ? String(v[0]) : '';
-    return v ? String(v) : '';
+    if (Array.isArray(v)) return v.length ? clean(v[0]) : '';
+    return v ? clean(v) : '';
   }
 
   /* Collapse the author list the way a slide would: up to three family names. */
   function shortAuthors(people) {
     const names = (people || [])
-      .map(a => a.family || a.name || a.literal || '')
+      .map(a => clean(a.family || a.name || a.literal || ''))
       .filter(Boolean);
     if (!names.length) return '';
     if (names.length <= 3) return names.join(', ');
@@ -59,8 +89,8 @@ const Meta = (() => {
       title: firstString((at.titles || []).map(t => t.title)),
       authors: shortAuthors(people),
       authorCount: people.length,
-      journal: container.title || at.publisher || '',
-      journalFull: container.title || at.publisher || '',
+      journal: clean(container.title || at.publisher || ''),
+      journalFull: clean(container.title || at.publisher || ''),
       year: at.publicationYear ? String(at.publicationYear) : '',
       volume: container.volume ? String(container.volume) : '',
       pages: container.firstPage
