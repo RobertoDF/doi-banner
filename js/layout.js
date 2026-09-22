@@ -243,20 +243,31 @@ const Layout = (() => {
   }
 
   function buildStrip(m, opt, s) {
-    const { W, H, family, ink, dim, prims } = s;
-    const padX = Math.round(W * 0.017);
-    const size = Math.round(H * 0.30);
-    const ruleW = opt.showRule ? Math.max(3, Math.round(W * 0.0022)) : 0;
-    const ruleGap = opt.showRule ? Math.round(W * 0.011) : 0;
-    const baseline = Math.round(H / 2 + size * 0.36);
+    const { W: maxW, family, ink, dim, prims } = s;
+    const padX = Math.round(maxW * 0.017);
+    const padY = 30;
+    const ruleW = opt.showRule ? Math.max(3, Math.round(maxW * 0.0025)) : 0;
+    const ruleGap = opt.showRule ? Math.round(maxW * 0.010) : 0;
+    const textX = padX + ruleW + ruleGap;
 
-    if (opt.showRule) {
-      const rh = Math.round(size * 1.15);
-      prims.push({
-        t: 'rect', x: padX, y: Math.round((H - rh) / 2), w: ruleW, h: rh,
-        rx: ruleW / 2, fill: opt.accent, opacity: 1
-      });
-    }
+    const doiText = opt.showDoi && m.doi ? m.doi : '';
+    let titleSize = 54;
+    let metaSize, doiSize, lines, blockH;
+
+    // Prefer a single line: shrink first, and only wrap to a second row when
+    // the title is genuinely too long to stay legible.
+    const fit = (maxLines, floor) => {
+      for (;;) {
+        metaSize = Math.round(titleSize * 0.62);
+        doiSize = Math.round(titleSize * 0.56);
+        lines = wrapRuns(titleRuns(m.title || ''), titleSize, family, maxW - textX - padX);
+        blockH = lines.length * titleSize * 1.16 + Math.round(titleSize * 0.30) + metaSize * 1.30;
+        if (lines.length <= maxLines || titleSize <= floor) return lines.length <= maxLines;
+        titleSize = Math.round(titleSize * 0.95);
+      }
+    };
+
+    if (!fit(1, 38)) { titleSize = 46; fit(2, 30); }
 
     const runs = [];
     if (m.authors) {
@@ -264,33 +275,64 @@ const Layout = (() => {
       if (m.authorCount > 1) runs.push({ text: ' et al.', weight: 400 });
     }
     if (m.journal) {
-      runs.push({ text: '  \u2022  ', weight: 400, opacity: dim });
+      if (runs.length) runs.push({ text: '  \u2022  ', weight: 400, opacity: dim });
       runs.push({ text: m.journal, weight: 400, italic: true });
     }
     if (m.year) runs.push({ text: ' ' + m.year, weight: 400 });
-    if (m.title) {
-      const short = m.title.split(': ')[0];
-      runs.push({ text: '  \u2022  ', weight: 400, opacity: dim });
-      runs.push({ text: short, weight: 400, opacity: 0.85 });
-    }
 
-    let x = padX + ruleW + ruleGap;
-    runs.forEach(run => {
-      prims.push({
-        t: 'text', x, y: baseline, size, family,
-        weight: run.weight || 400, italic: !!run.italic, mono: false,
-        fill: ink, opacity: run.opacity != null ? run.opacity : 1, text: run.text
+    const metaW = runs.reduce((w, r) => w + measure(r, metaSize, family), 0);
+    const doiGap = doiText && runs.length ? Math.round(metaSize * 1.4) : 0;
+    const doiW = doiText ? measure({ text: doiText, mono: true }, doiSize, family) : 0;
+
+    // The canvas is only as wide as the widest row — no dead space on the right.
+    const titleW = lines.reduce((w, l) =>
+      Math.max(w, l.runs.reduce((a, r) => a + measure(r, titleSize, family), 0)), 0);
+    const W = Math.min(maxW, Math.ceil(Math.max(titleW, metaW + doiGap + doiW) + textX + padX));
+
+    const H = Math.max(120, Math.round(blockH + padY * 2));
+    let y = Math.round((H - blockH) / 2);
+    const blockTop = y;
+
+    lines.forEach(line => {
+      let x = textX;
+      const baseline = y + titleSize * 0.90;
+      line.runs.forEach(run => {
+        prims.push({
+          t: 'text', x, y: baseline, size: titleSize, family,
+          weight: run.weight || 400, italic: !!run.italic, mono: !!run.mono,
+          fill: ink, opacity: run.opacity != null ? run.opacity : 1, text: run.text
+        });
+        x += measure(run, titleSize, family);
       });
-      x += measure(run, size, family);
+      y += titleSize * 1.16;
     });
 
-    if (opt.showDoi && m.doi) {
-      const dsize = Math.round(size * 0.78);
-      const run = { text: m.doi, mono: true, weight: 400 };
-      const w = measure(run, dsize, family);
+    y += Math.round(titleSize * 0.30);
+    const metaBaseline = y + metaSize * 0.90;
+
+    let x = textX;
+    runs.forEach(run => {
       prims.push({
-        t: 'text', x: W - padX - w, y: baseline, size: dsize, family,
-        weight: 400, italic: false, mono: true, fill: ink, opacity: 0.55, text: m.doi
+        t: 'text', x, y: metaBaseline, size: metaSize, family,
+        weight: run.weight || 400, italic: !!run.italic, mono: false,
+        fill: ink, opacity: run.opacity != null ? run.opacity : dim + 0.18, text: run.text
+      });
+      x += measure(run, metaSize, family);
+    });
+
+    if (doiText) {
+      prims.push({
+        t: 'text', x: x + doiGap, y: metaBaseline, size: doiSize, family,
+        weight: 400, italic: false, mono: true, fill: ink, opacity: 0.55, text: doiText
+      });
+    }
+
+    y += metaSize * 1.30;
+
+    if (opt.showRule) {
+      prims.unshift({
+        t: 'rect', x: padX, y: blockTop, w: ruleW, h: Math.max(1, y - blockTop),
+        rx: ruleW / 2, fill: opt.accent, opacity: 1
       });
     }
 

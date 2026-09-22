@@ -167,15 +167,20 @@
   /* ---- boot ---- */
   metaToFields();
 
+  function fromHash() {
+    const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
+    if (!Meta.normalize(hash)) return false;
+    if (Meta.normalize(hash) === Meta.normalize(el.doi.value)) return true;
+    el.doi.value = hash;
+    el.form.dispatchEvent(new Event('submit'));
+    return true;
+  }
+
+  window.addEventListener('hashchange', fromHash);
+
   // Wait for webfont-less metrics to settle before the first measure pass.
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
     draw();
-    const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
-    if (Meta.normalize(hash)) {
-      el.doi.value = hash;
-      el.form.dispatchEvent(new Event('submit'));
-    } else {
-      say('Showing an example. Paste a DOI to replace it.');
-    }
+    if (!fromHash()) say('Showing an example. Paste a DOI to replace it.');
   });
 })();
