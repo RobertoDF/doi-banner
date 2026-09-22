@@ -21,7 +21,8 @@ links straight to the DOI.
   `doi.org` content negotiation.
 - Renders two shapes:
   - **Card** — 1800 px wide, for a title slide or a section divider.
-  - **Footer strip** — a thin credit for the bottom of a slide.
+  - **Footer strip** — a thin one-line credit (authors, journal, year, DOI)
+    for the bottom of a slide you have already titled.
 
   Both are sized to their content, so there is no dead space around the text.
 - Exports **PNG** (at 2×, so it stays crisp on a projector) or **SVG**. The

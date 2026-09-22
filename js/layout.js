@@ -244,32 +244,19 @@ const Layout = (() => {
     return { width: W, height: H, prims };
   }
 
+    /* The footer strip is a one-line credit: authors, journal, year, DOI.
+     No title — that belongs on the slide itself. */
   function buildStrip(m, opt, s) {
     const { W: maxW, family, ink, dim, prims } = s;
     const padX = Math.round(maxW * 0.017);
-    const padY = 30;
+    const padY = 26;
     const ruleW = opt.showRule ? Math.max(3, Math.round(maxW * 0.0025)) : 0;
     const ruleGap = opt.showRule ? Math.round(maxW * 0.010) : 0;
     const textX = padX + ruleW + ruleGap;
 
     const doiText = opt.showDoi && m.doi ? m.doi : '';
-    let titleSize = 54;
-    let metaSize, doiSize, lines, blockH;
-
-    // Prefer a single line: shrink first, and only wrap to a second row when
-    // the title is genuinely too long to stay legible.
-    const fit = (maxLines, floor) => {
-      for (;;) {
-        metaSize = Math.round(titleSize * 0.62);
-        doiSize = Math.round(titleSize * 0.56);
-        lines = wrapRuns(titleRuns(m.title || ''), titleSize, family, maxW - textX - padX);
-        blockH = lines.length * titleSize * 1.16 + Math.round(titleSize * 0.30) + metaSize * 1.30;
-        if (lines.length <= maxLines || titleSize <= floor) return lines.length <= maxLines;
-        titleSize = Math.round(titleSize * 0.95);
-      }
-    };
-
-    if (!fit(1, 38)) { titleSize = 46; fit(2, 30); }
+    let metaSize = 46;
+    let doiSize = Math.round(metaSize * 0.86);
 
     const runs = [];
     if (m.authors) {
@@ -282,34 +269,26 @@ const Layout = (() => {
     }
     if (m.year) runs.push({ text: ' ' + m.year, weight: 400 });
 
-    const metaW = runs.reduce((w, r) => w + measure(r, metaSize, family), 0);
-    const doiGap = doiText && runs.length ? Math.round(metaSize * 1.4) : 0;
-    const doiW = doiText ? measure({ text: doiText, mono: true }, doiSize, family) : 0;
+    // Shrink to fit rather than wrap — a footer credit should stay one line.
+    let metaW, doiGap, doiW, rowW;
+    for (;;) {
+      doiSize = Math.round(metaSize * 0.86);
+      metaW = runs.reduce((w, r) => w + measure(r, metaSize, family), 0);
+      doiGap = doiText && runs.length ? Math.round(metaSize * 1.4) : 0;
+      doiW = doiText ? measure({ text: doiText, mono: true }, doiSize, family) : 0;
+      rowW = metaW + doiGap + doiW;
+      if (rowW <= maxW - textX - padX || metaSize <= 24) break;
+      metaSize -= 2;
+    }
 
-    // The canvas is only as wide as the widest row — no dead space on the right.
-    const titleW = lines.reduce((w, l) =>
-      Math.max(w, l.runs.reduce((a, r) => a + measure(r, titleSize, family), 0)), 0);
-    const W = Math.min(maxW, Math.ceil(Math.max(titleW, metaW + doiGap + doiW) + textX + padX));
+    const blockH = metaSize * 1.30;
 
-    const H = Math.max(120, Math.round(blockH + padY * 2));
+    // The canvas is only as wide as the row — no dead space on the right.
+    const W = Math.min(maxW, Math.ceil(rowW + textX + padX));
+    const H = Math.round(blockH + padY * 2);
+
     let y = Math.round((H - blockH) / 2);
     const blockTop = y;
-
-    lines.forEach(line => {
-      let x = textX;
-      const baseline = y + titleSize * 0.90;
-      line.runs.forEach(run => {
-        prims.push({
-          t: 'text', x, y: baseline, size: titleSize, family,
-          weight: run.weight || 400, italic: !!run.italic, mono: !!run.mono,
-          fill: ink, opacity: run.opacity != null ? run.opacity : 1, text: run.text
-        });
-        x += measure(run, titleSize, family);
-      });
-      y += titleSize * 1.16;
-    });
-
-    y += Math.round(titleSize * 0.30);
     const metaBaseline = y + metaSize * 0.90;
 
     let x = textX;
@@ -329,7 +308,7 @@ const Layout = (() => {
       });
     }
 
-    y += metaSize * 1.30;
+    y += blockH;
 
     if (opt.showRule) {
       prims.unshift({
