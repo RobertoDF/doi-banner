@@ -11,8 +11,7 @@
     preset: $('preset'), theme: $('theme'), typeface: $('typeface'),
     accent: $('accent'), swatches: $('swatches'),
     showQr: $('showQr'), qrPlate: $('qrPlate'), showRule: $('showRule'), showDoi: $('showDoi'),
-    scale: $('scale'), dlPng: $('dlPng'), dlSvg: $('dlSvg'),
-    fields: $('fields')
+    dlPng: $('dlPng'), dlSvg: $('dlSvg'),    fields: $('fields')
   };
 
   const F = {
@@ -137,20 +136,29 @@
   });
 
   /* ---- export ---- */
+  const EXPORT_SCALE = 2;
+
+  function backdrop() {
+    return Render.BACKDROPS[el.stage.dataset.bg] || null;
+  }
+
   function slug() {
     const base = (meta.authors || 'banner').split(',')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return [base, meta.year, el.preset.value, el.theme.value].filter(Boolean).join('-');
+    const bg = el.stage.dataset.bg === 'checker' ? 'transparent' : el.stage.dataset.bg;
+    return [base, meta.year, el.preset.value, bg].filter(Boolean).join('-');
   }
 
   el.dlPng.addEventListener('click', () => {
     if (!doc) return;
-    Render.savePNG(doc, parseInt(el.scale.value, 10), slug() + '.png');
-    say('Saved PNG — transparent background.');
+    Render.savePNG(doc, EXPORT_SCALE, slug() + '.png', backdrop());
+    say(backdrop()
+      ? 'Saved PNG on a ' + el.stage.dataset.bg + ' background.'
+      : 'Saved PNG \u2014 transparent background.');
   });
 
   el.dlSvg.addEventListener('click', () => {
     if (!doc) return;
-    Render.saveSVG(doc, slug() + '.svg');
+    Render.saveSVG(doc, slug() + '.svg', backdrop());
     say('Saved SVG. Fonts are referenced by name, so PNG is safer for sharing.');
   });
 

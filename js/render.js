@@ -1,8 +1,10 @@
 /* DOI Banner — renderers.
    One layout, two outputs: canvas (for preview + PNG) and SVG (for vector export).
-   Both leave the background fully transparent. */
+   The background is transparent unless a backdrop colour is passed in. */
 
 const Render = (() => {
+
+  const BACKDROPS = { checker: null, dark: '#101418', light: '#FFFFFF' };
 
   function fontString(p) {
     const style = p.italic ? 'italic ' : '';
@@ -11,7 +13,7 @@ const Render = (() => {
 
   /* ---- canvas --------------------------------------------------------- */
 
-  function toCanvas(doc, scale, canvas) {
+  function toCanvas(doc, scale, canvas, backdrop) {
     const c = canvas || document.createElement('canvas');
     c.width = Math.round(doc.width * scale);
     c.height = Math.round(doc.height * scale);
@@ -21,6 +23,11 @@ const Render = (() => {
     ctx.save();
     ctx.scale(scale, scale);
     ctx.textBaseline = 'alphabetic';
+
+    if (backdrop) {
+      ctx.fillStyle = backdrop;
+      ctx.fillRect(0, 0, doc.width, doc.height);
+    }
 
     doc.prims.forEach(p => {
       ctx.globalAlpha = p.opacity != null ? p.opacity : 1;
@@ -75,10 +82,14 @@ const Render = (() => {
 
   const num = n => (Math.round(n * 100) / 100);
 
-  function toSVG(doc) {
+  function toSVG(doc, backdrop) {
     const out = [];
     out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${doc.width}" height="${doc.height}" ` +
              `viewBox="0 0 ${doc.width} ${doc.height}" fill="none">`);
+
+    if (backdrop) {
+      out.push(`<rect x="0" y="0" width="${doc.width}" height="${doc.height}" fill="${backdrop}"/>`);
+    }
 
     doc.prims.forEach(p => {
       const op = (p.opacity != null && p.opacity !== 1) ? ` opacity="${num(p.opacity)}"` : '';
@@ -127,14 +138,14 @@ const Render = (() => {
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  function savePNG(doc, scale, filename) {
-    const c = toCanvas(doc, scale);
+  function savePNG(doc, scale, filename, backdrop) {
+    const c = toCanvas(doc, scale, null, backdrop);
     c.toBlob(b => save(b, filename), 'image/png');
   }
 
-  function saveSVG(doc, filename) {
-    save(new Blob([toSVG(doc)], { type: 'image/svg+xml' }), filename);
+  function saveSVG(doc, filename, backdrop) {
+    save(new Blob([toSVG(doc, backdrop)], { type: 'image/svg+xml' }), filename);
   }
 
-  return { toCanvas, toSVG, savePNG, saveSVG };
+  return { toCanvas, toSVG, savePNG, saveSVG, BACKDROPS };
 })();

@@ -22,7 +22,8 @@ links straight to the DOI.
 - Renders two shapes:
   - **Card** — 1800×500, for a title slide or a section divider.
   - **Footer strip** — 2400×140, for a thin credit along the bottom of a slide.
-- Exports **PNG with a genuinely transparent background** (1× / 2× / 3×) or **SVG**.
+- Exports **PNG** (at 2×, so it stays crisp on a projector) or **SVG**. The
+  preview backdrop is what you get: transparent, dark or light.
 - Everything runs in the browser. Nothing is uploaded, no build step, no
   dependencies to install.
 
