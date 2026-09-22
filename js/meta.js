@@ -110,18 +110,6 @@ const Meta = (() => {
     throw new Error('No metadata found for ' + doi + (lastErr ? ' (' + lastErr.message + ')' : ''));
   }
 
-  function citation(m) {
-    const parts = [];
-    if (m.authors) parts.push(m.authors + (m.authorCount > 3 ? ' et al.' : ''));
-    if (m.title) parts.push(m.title + '.');
-    let where = m.journalFull || m.journal || '';
-    if (m.volume) where += ' ' + m.volume;
-    if (m.pages) where += ', ' + m.pages;
-    if (m.year) where += ' (' + m.year + ')';
-    if (where.trim()) parts.push(where.trim() + '.');
-    if (m.doi) parts.push('https://doi.org/' + m.doi);
-    return parts.join(' ');
-  }
-
-  return { lookup, normalize, citation };
+  return { lookup, normalize };
 })();
+

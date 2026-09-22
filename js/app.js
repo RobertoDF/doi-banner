@@ -11,7 +11,7 @@
     preset: $('preset'), theme: $('theme'), typeface: $('typeface'),
     accent: $('accent'), swatches: $('swatches'),
     showQr: $('showQr'), qrPlate: $('qrPlate'), showRule: $('showRule'), showDoi: $('showDoi'),
-    scale: $('scale'), dlPng: $('dlPng'), dlSvg: $('dlSvg'), copyCite: $('copyCite'),
+    scale: $('scale'), dlPng: $('dlPng'), dlSvg: $('dlSvg'),
     fields: $('fields')
   };
 
@@ -152,16 +152,6 @@
     if (!doc) return;
     Render.saveSVG(doc, slug() + '.svg');
     say('Saved SVG. Fonts are referenced by name, so PNG is safer for sharing.');
-  });
-
-  el.copyCite.addEventListener('click', async () => {
-    const text = Meta.citation(meta);
-    try {
-      await navigator.clipboard.writeText(text);
-      say('Citation copied.');
-    } catch {
-      say(text);
-    }
   });
 
   /* ---- boot ---- */
