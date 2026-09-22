@@ -26,6 +26,7 @@ links straight to the DOI.
   Both are sized to their content, so there is no dead space around the text.
 - Exports **PNG** (at 2×, so it stays crisp on a projector) or **SVG**. The
   preview backdrop is what you get: transparent, dark or light.
+  Picking a dark or light backdrop flips the text colour to match.
 - Everything runs in the browser. Nothing is uploaded, no build step, no
   dependencies to install.
 

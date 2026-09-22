@@ -132,8 +132,18 @@
       el.stage.parentElement.querySelectorAll('.seg button').forEach(x => x.classList.remove('on'));
       b.classList.add('on');
       el.stage.dataset.bg = b.dataset.bg;
+      syncThemeToBackdrop();
+      draw();
     });
   });
+
+  // A dark plate wants white text, a light plate wants near-black. The select
+  // stays available for anyone who wants to override afterwards.
+  function syncThemeToBackdrop() {
+    const bg = el.stage.dataset.bg;
+    if (bg === 'dark') el.theme.value = 'light';
+    else if (bg === 'light') el.theme.value = 'dark';
+  }
 
   /* ---- export ---- */
   const EXPORT_SCALE = 2;
@@ -178,6 +188,7 @@
 
   // Wait for webfont-less metrics to settle before the first measure pass.
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+    syncThemeToBackdrop();
     draw();
     if (!fromHash()) say('Showing an example. Paste a DOI to replace it.');
   });

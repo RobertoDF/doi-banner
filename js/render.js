@@ -127,20 +127,33 @@ const Render = (() => {
 
   /* ---- download helpers ---------------------------------------------- */
 
-  function save(blob, filename) {
-    const url = URL.createObjectURL(blob);
+  function download(href, filename, revoke) {
     const a = document.createElement('a');
-    a.href = url;
+    a.href = href;
     a.download = filename;
+    a.rel = 'noopener';
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    if (revoke) setTimeout(() => URL.revokeObjectURL(href), 4000);
   }
 
+  function save(blob, filename) {
+    download(URL.createObjectURL(blob), filename, true);
+  }
+
+  /* Safari only honours a download that starts in the same tick as the click,
+     so the PNG is produced synchronously with toDataURL rather than toBlob. */
   function savePNG(doc, scale, filename, backdrop) {
     const c = toCanvas(doc, scale, null, backdrop);
-    c.toBlob(b => save(b, filename), 'image/png');
+    let url;
+    try {
+      url = c.toDataURL('image/png');
+    } catch (e) {
+      url = null;
+    }
+    if (url && url.length > 8) { download(url, filename); return; }
+    if (c.toBlob) { c.toBlob(b => b && save(b, filename), 'image/png'); }
   }
 
   function saveSVG(doc, filename, backdrop) {
