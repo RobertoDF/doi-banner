@@ -88,6 +88,16 @@ const Layout = (() => {
     return [{ text: title, weight: 600 }];
   }
 
+  /* A wrapped meta row should not open with the dangling "•" that separated
+     it from the row above. */
+  function trimLeadingSeps(lines) {
+    lines.forEach((line, i) => {
+      if (!i) return;
+      while (line.runs.length && /^[\s\u2022,]+$/.test(line.runs[0].text)) line.runs.shift();
+    });
+    return lines.filter(l => l.runs.length);
+  }
+
   function metaRuns(m, dim) {
     const runs = [];
     const sep = () => runs.push({ text: '  \u2022  ', weight: 400, opacity: dim });
@@ -157,18 +167,21 @@ const Layout = (() => {
 
     // Shrink the type until the title fits the line budget.
     let titleSize = Math.round(W * 0.040);
-    let lines, metaSize, doiSize, blockH;
+    let lines, metaLines, metaSize, doiSize, blockH;
     const minSize = titleSize * 0.55;
 
     for (;;) {
       metaSize = Math.round(titleSize * 0.50);
       doiSize = Math.round(titleSize * 0.36);
       lines = wrapRuns(tRuns, titleSize, family, textW);
+      // A long journal name wraps onto its own row rather than running out
+      // past the QR code.
+      metaLines = mRuns.length ? trimLeadingSeps(wrapRuns(mRuns, metaSize, family, textW)) : [];
 
       const titleH = lines.length * titleSize * 1.18;
-      const metaH = mRuns.length ? metaSize * 1.40 : 0;
+      const metaH = metaLines.length ? (metaLines.length - 1) * metaSize * 1.30 + metaSize * 1.40 : 0;
       const doiH = doiText ? doiSize * 1.45 : 0;
-      const gap1 = mRuns.length ? Math.round(titleSize * 0.34) : 0;
+      const gap1 = metaLines.length ? Math.round(titleSize * 0.34) : 0;
       const gap2 = doiText ? Math.round(titleSize * 0.16) : 0;
       blockH = titleH + gap1 + metaH + gap2 + doiH;
 
@@ -198,19 +211,21 @@ const Layout = (() => {
     });
 
     // meta
-    if (mRuns.length) {
+    if (metaLines.length) {
       y += Math.round(titleSize * 0.34);
-      let x = textX;
-      const baseline = y + metaSize * 0.92;
-      mRuns.forEach(run => {
-        prims.push({
-          t: 'text', x, y: baseline, size: metaSize, family,
-          weight: run.weight || 400, italic: !!run.italic, mono: false,
-          fill: ink, opacity: run.opacity != null ? run.opacity : 1, text: run.text
+      metaLines.forEach((line, i) => {
+        let x = textX;
+        const baseline = y + metaSize * 0.92;
+        line.runs.forEach(run => {
+          prims.push({
+            t: 'text', x, y: baseline, size: metaSize, family,
+            weight: run.weight || 400, italic: !!run.italic, mono: false,
+            fill: ink, opacity: run.opacity != null ? run.opacity : 1, text: run.text
+          });
+          x += measure(run, metaSize, family);
         });
-        x += measure(run, metaSize, family);
+        y += i === metaLines.length - 1 ? metaSize * 1.40 : metaSize * 1.30;
       });
-      y += metaSize * 1.40;
     }
 
     // doi
@@ -284,7 +299,8 @@ const Layout = (() => {
     const blockH = metaSize * 1.30;
 
     // The canvas is only as wide as the row — no dead space on the right.
-    const W = Math.min(maxW, Math.ceil(rowW + textX + padX));
+    // If the row will not shrink far enough to fit, grow rather than clip.
+    const W = Math.ceil(rowW + textX + padX);
     const H = Math.round(blockH + padY * 2);
 
     let y = Math.round((H - blockH) / 2);
