@@ -320,6 +320,32 @@ const Layout = (() => {
     return { width: W, height: H, prims };
   }
 
+  /* Several banners in one image. Each doc is laid out independently, then
+     translated down the page; the sheet is as wide as the widest banner. */
+  function compose(docs, opt) {
+    const list = docs.filter(Boolean);
+    if (list.length === 0) return { width: 1, height: 1, prims: [] };
+    if (list.length === 1) return list[0];
+
+    const width = Math.max.apply(null, list.map(d => d.width));
+    const gap = Math.round(width * (opt && opt.preset === 'strip' ? 0.012 : 0.014));
+    const prims = [];
+    let y = 0;
+
+    list.forEach((d, i) => {
+      if (i) y += gap;
+      const dy = y;
+      d.prims.forEach(p => {
+        const q = Object.assign({}, p);
+        q.y = p.y + dy;
+        prims.push(q);
+      });
+      y += d.height;
+    });
+
+    return { width, height: y, prims };
+  }
+
   function pushQr(prims, doi, x, y, size, platePad, ink, opt) {
     const modules = qrMatrix('https://doi.org/' + doi);
     const n = modules.length;
@@ -334,5 +360,5 @@ const Layout = (() => {
     });
   }
 
-  return { build, PRESETS, FONTS, qrMatrix };
+  return { build, compose, PRESETS, FONTS, qrMatrix };
 })();

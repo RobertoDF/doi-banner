@@ -11,14 +11,14 @@
 
 <header class="masthead">
   <h1>DOI&thinsp;<span>Banner</span></h1>
-  <p>Paste a DOI. Get a transparent citation banner for your slides.</p>
+  <p>Paste a DOI — or a list of them — for a transparent citation banner.</p>
 </header>
 
 <main>
   <form id="lookup" class="lookup" autocomplete="off">
-    <label class="sr-only" for="doi">DOI</label>
-    <input id="doi" name="doi" type="text" spellcheck="false" autocomplete="off"
-           placeholder="10.1038/s41592-024-02318-2  ·  or a doi.org URL">
+    <label class="sr-only" for="doi">DOI — one per line for several banners</label>
+    <textarea id="doi" name="doi" rows="1" spellcheck="false" autocomplete="off"
+              placeholder="10.1038/s41592-024-02318-2  ·  or a doi.org URL&#10;paste several, one per line, for one stacked image"></textarea>
     <button type="submit" id="go">Fetch</button>
   </form>
   <p id="status" class="status" role="status" aria-live="polite"></p>
@@ -79,6 +79,7 @@
 
   <details class="fields" id="fields">
     <summary>Edit text</summary>
+    <p class="note" id="fieldsNote" hidden>Showing several papers — the fields below edit the first one.</p>
     <div class="grid">
       <label>Title <input type="text" autocomplete="off" id="f-title"></label>
       <label>Authors <input type="text" autocomplete="off" id="f-authors" placeholder="Weinreb, Pearl, Lin"></label>

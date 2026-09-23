@@ -51,7 +51,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 60px; }
 /* ---- lookup ---- */
 .lookup { display: flex; gap: 10px; }
 
-.lookup input {
+.lookup textarea {
   flex: 1 1 auto;
   min-width: 0;
   background: var(--panel);
@@ -60,13 +60,17 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 60px; }
   color: var(--ink);
   font: 400 17px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
   padding: 15px 18px;
+  resize: none;
+  overflow: hidden;
+  min-height: 54px;
 }
-.lookup input:focus {
+.lookup textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
   border-color: transparent;
 }
-.lookup input::placeholder { color: #5C6673; }
+.lookup textarea::placeholder { color: #5C6673; }
+.lookup button { align-self: flex-start; }
 
 button {
   font-family: inherit;
@@ -217,6 +221,11 @@ input[type="color"] {
   color: var(--muted);
 }
 .fields summary:hover { color: var(--ink); }
+.fields .note {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--dim);
+}
 .fields .grid {
   padding: 4px 22px 22px;
   display: grid;

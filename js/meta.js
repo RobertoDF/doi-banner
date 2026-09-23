@@ -11,6 +11,21 @@ const Meta = (() => {
     return m ? m[0].replace(/[.,;]+$/, '') : null;
   }
 
+  /* Pull every DOI out of a pasted block — one per line, comma separated,
+     a wall of doi.org URLs, whatever turns up. Duplicates are dropped. */
+  function normalizeAll(input) {
+    if (!input) return [];
+    const found = String(input).match(new RegExp(DOI_RE.source, 'gi')) || [];
+    const seen = new Set();
+    const out = [];
+    found.forEach(hit => {
+      const doi = hit.replace(/[.,;]+$/, '');
+      const key = doi.toLowerCase();
+      if (!seen.has(key)) { seen.add(key); out.push(doi); }
+    });
+    return out;
+  }
+
   async function getJSON(url, headers) {
     const r = await fetch(url, { headers: headers || {} });
     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -140,6 +155,6 @@ const Meta = (() => {
     throw new Error('No metadata found for ' + doi + (lastErr ? ' (' + lastErr.message + ')' : ''));
   }
 
-  return { lookup, normalize };
+  return { lookup, normalize, normalizeAll };
 })();
 

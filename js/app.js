@@ -11,7 +11,7 @@
     preset: $('preset'), theme: $('theme'), typeface: $('typeface'),
     accent: $('accent'), swatches: $('swatches'),
     showQr: $('showQr'), qrPlate: $('qrPlate'), showRule: $('showRule'), showDoi: $('showDoi'),
-    dlPng: $('dlPng'), dlSvg: $('dlSvg'),    fields: $('fields')
+    dlPng: $('dlPng'), dlSvg: $('dlSvg'), fields: $('fields'), fieldsNote: $('fieldsNote')
   };
 
   const F = {
@@ -29,8 +29,10 @@
     doi: '10.1038/s41592-024-02318-2'
   };
 
-  let meta = Object.assign({}, DEMO);
+  // One entry per DOI. The edit fields always drive papers[0].
+  let papers = [Object.assign({}, DEMO)];
   let doc = null;
+  const meta = () => papers[0];
 
   /* ---- swatches ---- */
   ACCENTS.forEach(hex => {
@@ -45,23 +47,26 @@
 
   /* ---- state <-> fields ---- */
   function metaToFields() {
-    F.title.value = meta.title || '';
-    F.authors.value = meta.authors || '';
-    F.journal.value = meta.journal || '';
-    F.year.value = meta.year || '';
-    F.volume.value = meta.volume || '';
-    F.pages.value = meta.pages || '';
-    F.doi.value = meta.doi || '';
+    const m = meta();
+    F.title.value = m.title || '';
+    F.authors.value = m.authors || '';
+    F.journal.value = m.journal || '';
+    F.year.value = m.year || '';
+    F.volume.value = m.volume || '';
+    F.pages.value = m.pages || '';
+    F.doi.value = m.doi || '';
+    el.fieldsNote.hidden = papers.length < 2;
   }
 
   function fieldsToMeta() {
-    meta.title = F.title.value;
-    meta.authors = F.authors.value;
-    meta.journal = F.journal.value;
-    meta.year = F.year.value;
-    meta.volume = F.volume.value;
-    meta.pages = F.pages.value;
-    meta.doi = Meta.normalize(F.doi.value) || F.doi.value.trim();
+    const m = meta();
+    m.title = F.title.value;
+    m.authors = F.authors.value;
+    m.journal = F.journal.value;
+    m.year = F.year.value;
+    m.volume = F.volume.value;
+    m.pages = F.pages.value;
+    m.doi = Meta.normalize(F.doi.value) || F.doi.value.trim();
   }
 
   function options() {
@@ -81,7 +86,7 @@
   function draw() {
     const opt = options();
     try {
-      doc = Layout.build(meta, opt);
+      doc = Layout.compose(papers.map(p => Layout.build(p, opt)), opt);
     } catch (e) {
       say('Could not lay that out: ' + e.message, true);
       return;
@@ -89,7 +94,8 @@
     // Render the preview at 2x so it stays sharp on retina, then let CSS size it.
     Render.toCanvas(doc, 2, el.canvas);
     el.canvas.style.aspectRatio = doc.width + ' / ' + doc.height;
-    el.dims.textContent = doc.width + ' × ' + doc.height + ' px';
+    el.dims.textContent = doc.width + ' × ' + doc.height + ' px' +
+      (papers.length > 1 ? '  ·  ' + papers.length + ' papers' : '');
     el.qrPlate.disabled = !el.showQr.checked;
   }
 
@@ -99,25 +105,68 @@
   }
 
   /* ---- lookup ---- */
+  const MAX_DOIS = 12;
+
   el.form.addEventListener('submit', async e => {
     e.preventDefault();
-    const raw = el.doi.value.trim();
-    if (!raw) { say('Paste a DOI first.', true); return; }
+    let list = Meta.normalizeAll(el.doi.value);
+    if (!list.length) { say('Paste a DOI first.', true); return; }
+
+    const trimmed = list.length > MAX_DOIS;
+    if (trimmed) list = list.slice(0, MAX_DOIS);
 
     el.go.disabled = true;
-    say('Looking up ' + (Meta.normalize(raw) || raw) + '\u2026');
-    try {
-      meta = await Meta.lookup(raw);
-      metaToFields();
-      draw();
-      say('Found via ' + meta.source + '.');
-      history.replaceState(null, '', '#' + meta.doi);
-    } catch (err) {
-      say(err.message, true);
-    } finally {
+    say(list.length === 1
+      ? 'Looking up ' + list[0] + '\u2026'
+      : 'Looking up ' + list.length + ' DOIs\u2026');
+
+    // One failure should not cost you the rest of the list.
+    const results = await Promise.all(list.map(async doi => {
+      try { return { ok: true, meta: await Meta.lookup(doi) }; }
+      catch (err) { return { ok: false, doi, message: err.message }; }
+    }));
+
+    const found = results.filter(r => r.ok).map(r => r.meta);
+    const failed = results.filter(r => !r.ok);
+
+    if (!found.length) {
+      say(failed.length === 1 ? failed[0].message
+        : 'None of those ' + failed.length + ' DOIs resolved.', true);
       el.go.disabled = false;
+      return;
+    }
+
+    papers = found;
+    metaToFields();
+    draw();
+
+    if (failed.length) {
+      say('Rendered ' + found.length + ' of ' + results.length +
+          ' \u2014 no metadata for ' + failed.map(f => f.doi).join(', ') + '.', true);
+    } else {
+      say(found.length === 1
+        ? 'Found via ' + found[0].source + '.'
+        : 'Found all ' + found.length + ' papers.' +
+          (trimmed ? ' Only the first ' + MAX_DOIS + ' were used.' : ''));
+    }
+
+    history.replaceState(null, '', '#' + found.map(m => m.doi).join(','));
+    el.go.disabled = false;
+  });
+
+  // Enter fetches; Shift+Enter adds another DOI on its own line.
+  el.doi.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      el.form.requestSubmit ? el.form.requestSubmit() : el.form.dispatchEvent(new Event('submit'));
     }
   });
+
+  function growInput() {
+    el.doi.style.height = 'auto';
+    el.doi.style.height = Math.min(el.doi.scrollHeight, 260) + 'px';
+  }
+  el.doi.addEventListener('input', growInput);
 
   /* ---- controls ---- */
   ['preset', 'theme', 'typeface', 'accent', 'showQr', 'qrPlate', 'showRule', 'showDoi']
@@ -153,9 +202,11 @@
   }
 
   function slug() {
-    const base = (meta.authors || 'banner').split(',')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const m = meta();
+    const base = (m.authors || 'banner').split(',')[0].trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const bg = el.stage.dataset.bg === 'checker' ? 'transparent' : el.stage.dataset.bg;
-    return [base, meta.year, el.preset.value, bg].filter(Boolean).join('-');
+    const many = papers.length > 1 ? 'plus-' + (papers.length - 1) : '';
+    return [base, m.year, many, el.preset.value, bg].filter(Boolean).join('-');
   }
 
   el.dlPng.addEventListener('click', () => {
@@ -176,10 +227,12 @@
   metaToFields();
 
   function fromHash() {
-    const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
-    if (!Meta.normalize(hash)) return false;
-    if (Meta.normalize(hash) === Meta.normalize(el.doi.value)) return true;
-    el.doi.value = hash;
+    const wanted = Meta.normalizeAll(decodeURIComponent(location.hash.replace(/^#/, '')));
+    if (!wanted.length) return false;
+    const showing = Meta.normalizeAll(el.doi.value).join('|').toLowerCase();
+    if (wanted.join('|').toLowerCase() === showing) return true;
+    el.doi.value = wanted.join('\n');
+    growInput();
     el.form.dispatchEvent(new Event('submit'));
     return true;
   }

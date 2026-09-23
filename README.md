@@ -1,6 +1,7 @@
 # DOI Banner
 
-Paste a DOI, get a transparent citation banner for your slides.
+Paste a DOI — or a whole list of them — and get a transparent citation
+banner for your slides.
 
 **→ https://robertodf.github.io/doi-banner/**
 
@@ -25,6 +26,10 @@ links straight to the DOI.
     for the bottom of a slide you have already titled.
 
   Both are sized to their content, so there is no dead space around the text.
+- Takes **several DOIs at once**. Paste one per line and they come back
+  stacked into a single image — handy for a references slide or a
+  “building on” slide. Up to 12 per run; a DOI that fails to resolve is
+  reported and the rest are still drawn.
 - Exports **PNG** (at 2×, so it stays crisp on a projector) or **SVG**. The
   preview backdrop is what you get: transparent, dark or light.
   Picking a dark or light backdrop flips the text colour to match.
@@ -39,7 +44,7 @@ links straight to the DOI.
 | Typeface | Humanist sans, serif, grotesk or mono — all system fonts. |
 | Accent | The rule beside the text. Presets plus a colour picker. |
 | QR to DOI | Optional. Add a white plate if your audience scans with Android — inverted QR codes are not universally readable. |
-| Edit text | Every field is editable if the publisher's metadata is wrong or too long. |
+| Edit text | Every field is editable if the publisher's metadata is wrong or too long. With several DOIs loaded, these fields edit the first paper. |
 
 ## Deep links
 
@@ -47,6 +52,12 @@ Append a DOI to the URL and the banner is built on load:
 
 ```
 https://robertodf.github.io/doi-banner/#10.1038/s41592-024-02318-2
+```
+
+Separate several with commas to get the stacked version:
+
+```
+https://robertodf.github.io/doi-banner/#10.1038/s41592-024-02318-2,10.1016/j.neubiorev.2024.105538
 ```
 
 ## Notes
