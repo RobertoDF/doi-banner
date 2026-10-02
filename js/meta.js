@@ -1,5 +1,6 @@
-/* DOI Banner — metadata lookup.
-   Crossref first (best journal metadata), DataCite second, doi.org CSL as a last resort. */
+/* DOI / Link Banner — metadata lookup.
+   DOI inputs use Crossref, DataCite and doi.org. Generic URLs are rendered
+   locally as editable resources without requiring a metadata proxy. */
 
 const Meta = (() => {
 
@@ -9,6 +10,20 @@ const Meta = (() => {
     if (!input) return null;
     const m = String(input).trim().match(DOI_RE);
     return m ? m[0].replace(/[.,;]+$/, '') : null;
+  }
+
+  function normalizeUrl(input) {
+    if (!input) return null;
+    let raw = String(input).trim();
+    if (!/^https?:\/\//i.test(raw)) return null;
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+      u.hash = '';
+      return u.href;
+    } catch (e) {
+      return null;
+    }
   }
 
   /* Pull every DOI out of a pasted block — one per line, comma separated,
@@ -26,15 +41,43 @@ const Meta = (() => {
     return out;
   }
 
+  function parseInputs(input) {
+    if (!input) return [];
+    const chunks = String(input)
+      .split(/\n+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const out = [];
+    const seen = new Set();
+
+    chunks.forEach(chunk => {
+      const doi = normalize(chunk);
+      const doiUrlOnly = doi && /^https?:\/\/(?:dx\.)?doi\.org\//i.test(chunk);
+      const url = normalizeUrl(chunk);
+
+      let item = null;
+      if (doi && (!url || doiUrlOnly)) item = { type: 'doi', value: doi };
+      else if (url) item = { type: 'url', value: url };
+      else if (doi) item = { type: 'doi', value: doi };
+
+      if (!item) return;
+      const key = item.type + ':' + item.value.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(item);
+      }
+    });
+
+    return out;
+  }
+
   async function getJSON(url, headers) {
     const r = await fetch(url, { headers: headers || {} });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
   }
 
-  /* Crossref ships JATS markup and HTML-escaped text: a title can arrive as
-     "Ca<sub>2+</sub> waves" and a journal as "Neuroscience &amp; Biobehavioral
-     Reviews". Strip the tags, then decode the entities. */
   const ENTITIES = {
     amp: '&', lt: '<', gt: '>', quot: '"', apos: '\u2019', nbsp: ' ',
     ndash: '\u2013', mdash: '\u2014', hellip: '\u2026', middot: '\u00b7',
@@ -67,7 +110,6 @@ const Meta = (() => {
     return v ? clean(v) : '';
   }
 
-  /* Collapse the author list the way a slide would: up to three family names. */
   function shortAuthors(people) {
     const names = (people || [])
       .map(a => clean(a.family || a.name || a.literal || ''))
@@ -79,7 +121,9 @@ const Meta = (() => {
 
   function fromCrossref(msg) {
     const issued = (msg.issued && msg.issued['date-parts'] && msg.issued['date-parts'][0]) || [];
+    const doi = (msg.DOI || '').toLowerCase();
     return {
+      kind: 'doi',
       title: firstString(msg.title).replace(/\s+/g, ' ').trim(),
       authors: shortAuthors(msg.author),
       authorCount: (msg.author || []).length,
@@ -88,7 +132,8 @@ const Meta = (() => {
       year: issued[0] ? String(issued[0]) : '',
       volume: msg.volume ? String(msg.volume) : '',
       pages: msg.page ? String(msg.page).replace(/-+/g, '\u2013') : '',
-      doi: (msg.DOI || '').toLowerCase(),
+      doi,
+      url: doi ? 'https://doi.org/' + doi : '',
       source: 'Crossref'
     };
   }
@@ -100,7 +145,9 @@ const Meta = (() => {
       name: c.name || ''
     }));
     const container = at.container || {};
+    const doi = (at.doi || '').toLowerCase();
     return {
+      kind: 'doi',
       title: firstString((at.titles || []).map(t => t.title)),
       authors: shortAuthors(people),
       authorCount: people.length,
@@ -111,14 +158,17 @@ const Meta = (() => {
       pages: container.firstPage
         ? container.firstPage + (container.lastPage ? '\u2013' + container.lastPage : '')
         : '',
-      doi: (at.doi || '').toLowerCase(),
+      doi,
+      url: doi ? 'https://doi.org/' + doi : '',
       source: 'DataCite'
     };
   }
 
   function fromCSL(d) {
     const issued = (d.issued && d.issued['date-parts'] && d.issued['date-parts'][0]) || [];
+    const doi = (d.DOI || '').toLowerCase();
     return {
+      kind: 'doi',
       title: firstString(d.title).replace(/\s+/g, ' ').trim(),
       authors: shortAuthors(d.author),
       authorCount: (d.author || []).length,
@@ -127,7 +177,8 @@ const Meta = (() => {
       year: issued[0] ? String(issued[0]) : '',
       volume: d.volume ? String(d.volume) : '',
       pages: d.page ? String(d.page).replace(/-+/g, '\u2013') : '',
-      doi: (d.DOI || '').toLowerCase(),
+      doi,
+      url: doi ? 'https://doi.org/' + doi : '',
       source: 'doi.org'
     };
   }
@@ -148,6 +199,7 @@ const Meta = (() => {
         const meta = await attempt();
         if (meta && meta.title) {
           meta.doi = meta.doi || doi;
+          meta.url = meta.url || 'https://doi.org/' + meta.doi;
           return meta;
         }
       } catch (e) { lastErr = e; }
@@ -155,6 +207,36 @@ const Meta = (() => {
     throw new Error('No metadata found for ' + doi + (lastErr ? ' (' + lastErr.message + ')' : ''));
   }
 
-  return { lookup, normalize, normalizeAll };
-})();
+  function resourceFromUrl(raw) {
+    const url = normalizeUrl(raw);
+    if (!url) throw new Error('That does not look like an http(s) link.');
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '');
+    let title = host;
+    const path = decodeURIComponent(u.pathname)
+      .replace(/\/+$/, '')
+      .split('/')
+      .filter(Boolean)
+      .pop();
+    if (path) {
+      title = path.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim() || host;
+      title = title.replace(/\b\w/g, c => c.toUpperCase());
+    }
+    return {
+      kind: 'url',
+      title,
+      authors: '',
+      authorCount: 0,
+      journal: host,
+      journalFull: host,
+      year: '',
+      volume: '',
+      pages: '',
+      doi: '',
+      url,
+      source: 'Link'
+    };
+  }
 
+  return { lookup, normalize, normalizeUrl, normalizeAll, parseInputs, resourceFromUrl };
+})();
