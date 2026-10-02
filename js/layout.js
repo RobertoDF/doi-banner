@@ -152,7 +152,8 @@ const Layout = (() => {
     const ruleW = opt.showRule ? Math.max(4, Math.round(W * 0.0034)) : 0;
     const ruleGap = opt.showRule ? Math.round(W * 0.024) : 0;
 
-    const qrOn = opt.showQr && m.doi;
+    const target = m.url || (m.doi ? 'https://doi.org/' + m.doi : '');
+    const qrOn = opt.showQr && target;
     const qrSize = qrOn ? Math.round(W * 0.105) : 0;
     const platePad = qrOn && opt.qrPlate ? Math.round(qrSize * 0.10) : 0;
     const qrBox = qrSize + platePad * 2;
@@ -163,7 +164,7 @@ const Layout = (() => {
 
     const tRuns = titleRuns(m.title || '');
     const mRuns = metaRuns(m, dim);
-    const doiText = opt.showDoi && m.doi ? 'doi.org/' + m.doi : '';
+    const doiText = opt.showDoi && target ? (m.kind === 'doi' && m.doi ? 'doi.org/' + m.doi : target.replace(/^https?:\/\//i, '')) : '';
 
     // Shrink the type until the title fits the line budget.
     let titleSize = Math.round(W * 0.040);
@@ -253,7 +254,7 @@ const Layout = (() => {
     if (qrOn) {
       const qx = W - padX - qrBox;
       const qy = Math.round((H - qrBox) / 2);
-      pushQr(prims, m.doi, qx, qy, qrSize, platePad, ink, opt);
+      pushQr(prims, target, qx, qy, qrSize, platePad, ink, opt);
     }
 
     return { width: W, height: H, prims };
@@ -269,7 +270,8 @@ const Layout = (() => {
     const ruleGap = opt.showRule ? Math.round(maxW * 0.010) : 0;
     const textX = padX + ruleW + ruleGap;
 
-    const doiText = opt.showDoi && m.doi ? m.doi : '';
+    const target = m.url || (m.doi ? 'https://doi.org/' + m.doi : '');
+    const doiText = opt.showDoi && target ? (m.kind === 'doi' && m.doi ? m.doi : target.replace(/^https?:\/\//i, '')) : '';
     let metaSize = 46;
     let doiSize = Math.round(metaSize * 0.86);
 
@@ -362,8 +364,8 @@ const Layout = (() => {
     return { width, height: y, prims };
   }
 
-  function pushQr(prims, doi, x, y, size, platePad, ink, opt) {
-    const modules = qrMatrix('https://doi.org/' + doi);
+  function pushQr(prims, target, x, y, size, platePad, ink, opt) {
+    const modules = qrMatrix(target);
     const n = modules.length;
     const box = size + platePad * 2;
 

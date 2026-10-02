@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DOI Banner — paper citation banners for slides</title>
-<meta name="description" content="Paste a DOI, get a transparent citation banner for your slides. PNG and SVG, no server, no tracking.">
+<title>DOI / Link Banner — clean resource banners for slides</title>
+<meta name="description" content="Paste a DOI or web link and get a transparent, QR-enabled banner for your slides. PNG and SVG, no server, no tracking.">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header class="masthead">
-  <h1>DOI&thinsp;<span>Banner</span></h1>
-  <p>Paste a DOI — or a list of them — for a transparent citation banner.</p>
+  <h1>DOI / Link&thinsp;<span>Banner</span></h1>
+  <p>Paste a DOI or web link — or a list of them — for a transparent resource banner.</p>
 </header>
 
 <main>
   <form id="lookup" class="lookup" autocomplete="off">
-    <label class="sr-only" for="doi">DOI — one per line for several banners</label>
+    <label class="sr-only" for="doi">DOI or web link — one per line for several banners</label>
     <textarea id="doi" name="doi" rows="1" spellcheck="false" autocomplete="off"
-              placeholder="10.1038/s41592-024-02318-2  ·  or a doi.org URL&#10;paste several, one per line, for one stacked image"></textarea>
+              placeholder="10.1038/s41592-024-02318-2  ·  or https://example.org/tool&#10;paste several, one per line, for one stacked image"></textarea>
     <button type="submit" id="go">Fetch</button>
   </form>
   <p id="status" class="status" role="status" aria-live="polite"></p>
@@ -70,10 +70,10 @@
     </div>
 
     <div class="ctl checks">
-      <label class="chk"><input type="checkbox" id="showQr" checked> QR to DOI</label>
+      <label class="chk"><input type="checkbox" id="showQr" checked> QR to target</label>
       <label class="chk"><input type="checkbox" id="qrPlate"> QR on white plate</label>
       <label class="chk"><input type="checkbox" id="showRule" checked> Accent rule</label>
-      <label class="chk"><input type="checkbox" id="showDoi" checked> DOI line</label>
+      <label class="chk"><input type="checkbox" id="showDoi" checked> DOI / link line</label>
     </div>
   </section>
 
@@ -87,7 +87,7 @@
       <label>Year <input type="text" autocomplete="off" id="f-year"></label>
       <label>Volume <input type="text" autocomplete="off" id="f-volume"></label>
       <label>Pages <input type="text" autocomplete="off" id="f-pages"></label>
-      <label class="wide">DOI <input type="text" autocomplete="off" id="f-doi"></label>
+      <label class="wide">Target <input type="text" autocomplete="off" id="f-target" placeholder="DOI or https://…"></label>
     </div>
   </details>
 
@@ -98,9 +98,9 @@
 </main>
 
 <footer class="foot">
-  <p>Metadata from <a href="https://www.crossref.org/">Crossref</a> and <a href="https://datacite.org/">DataCite</a>.
+  <p>DOI metadata from <a href="https://www.crossref.org/">Crossref</a> and <a href="https://datacite.org/">DataCite</a>. Generic links stay local and editable.
      Everything runs in your browser — nothing is uploaded.</p>
-  <p><a href="https://github.com/RobertoDF/doi-banner">Source on GitHub</a> · MIT</p>
+  <p><a href="https://github.com/dhuzard/doi-link-banner">Source on GitHub</a> · MIT</p>
 </footer>
 
 <script src="vendor/qrcode.js"></script>
