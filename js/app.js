@@ -11,7 +11,7 @@
     preset: $('preset'), theme: $('theme'), typeface: $('typeface'),
     accent: $('accent'), swatches: $('swatches'),
     showQr: $('showQr'), qrPlate: $('qrPlate'), showRule: $('showRule'), showDoi: $('showDoi'),
-    dlPng: $('dlPng'), dlSvg: $('dlSvg'), fields: $('fields'), fieldsNote: $('fieldsNote')
+    dlPng: $('dlPng'), dlSvg: $('dlSvg'), copyPng: $('copyPng'), fields: $('fields'), fieldsNote: $('fieldsNote')
   };
 
   const F = {
@@ -169,7 +169,10 @@
     }
 
     const hash = found.map(m => m.kind === 'doi' ? m.doi : m.url).join('\n');
-    history.replaceState(null, '', '#' + encodeURIComponent(hash));
+    // Office.js removes history.replaceState inside the PowerPoint task pane.
+    if (typeof history.replaceState === 'function') {
+      history.replaceState(null, '', '#' + encodeURIComponent(hash));
+    }
     el.go.disabled = false;
   });
 
@@ -242,11 +245,51 @@
     say('Saved SVG. Fonts are referenced by name, so PNG is safer for sharing.');
   });
 
+  // Clipboard image at download resolution. The blob is passed as a promise so
+  // Safari keeps the user-gesture context; unsupported browsers download instead.
+  function canCopyImage() {
+    return !!(window.isSecureContext && navigator.clipboard && navigator.clipboard.write &&
+              window.ClipboardItem);
+  }
+
+  el.copyPng.addEventListener('click', async () => {
+    if (!doc) return;
+    if (!canCopyImage()) {
+      Render.savePNG(doc, EXPORT_SCALE, slug() + '.png', backdrop());
+      say('This browser cannot copy images \u2014 downloaded the PNG instead.', true);
+      return;
+    }
+    const canvas = Render.toCanvas(doc, EXPORT_SCALE, null, backdrop());
+    const blob = new Promise((resolve, reject) =>
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('could not encode PNG')), 'image/png'));
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      say('Copied PNG (' + canvas.width + ' \u00d7 ' + canvas.height + ' px' +
+          (backdrop() ? ', ' + el.stage.dataset.bg + ' background' : ', transparent') + ').');
+    } catch (e) {
+      say('Could not copy image: ' + (e && e.message ? e.message : e) + '. Use Download PNG instead.', true);
+    }
+  });
+
+  // Shared hooks for other front-ends (e.g. the PowerPoint task pane).
+  window.Banner = {
+    svg: () => doc ? Render.toSVG(doc, backdrop()) : null,
+    pngDataURL: () => doc ? Render.toCanvas(doc, EXPORT_SCALE, null, backdrop()).toDataURL('image/png') : null,
+    size: () => doc ? { width: doc.width, height: doc.height } : null,
+    say
+  };
+
   /* ---- boot ---- */
   metaToFields();
 
+  // ?doi=… or ?target=… (repeatable) work like the hash, for links from Shortcuts etc.
+  function fromQuery() {
+    const q = new URLSearchParams(location.search);
+    return q.getAll('doi').concat(q.getAll('target')).join('\n');
+  }
+
   function fromHash() {
-    const raw = decodeURIComponent(location.hash.replace(/^#/, ''));
+    const raw = decodeURIComponent(location.hash.replace(/^#/, '')) || fromQuery();
     const wanted = Meta.parseInputs(raw);
     if (!wanted.length) return false;
     const normalized = wanted.map(x => x.value).join('|').toLowerCase();
