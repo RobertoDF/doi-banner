@@ -1,0 +1,45 @@
+/* Compact overrides for the PowerPoint task pane (~320px wide). */
+body.addin { font-size: 14px; }
+body.addin main { max-width: none; padding: 12px 12px 24px; }
+
+body.addin .lookup { flex-direction: column; gap: 8px; }
+body.addin .lookup textarea { font-size: 14px; padding: 10px 12px; min-height: 40px; }
+body.addin .lookup button { align-self: stretch; }
+
+body.addin button { font-size: 14px; padding: 9px 14px; }
+body.addin #go, body.addin .primary { padding-inline: 16px; }
+
+body.addin .status { margin-top: 8px; font-size: 13px; min-height: 18px; }
+
+body.addin .actions { margin-top: 10px; gap: 8px; }
+body.addin .actions.insert button { width: 100%; }
+body.addin .actions.secondary button { flex: 1 1 0; font-size: 13px; }
+
+body.addin .stage-wrap { margin-top: 12px; }
+body.addin .stage { padding: 10px; }
+body.addin .stage-bar { flex-wrap: wrap; gap: 6px; }
+body.addin .seg button { padding: 6px 9px; font-size: 12px; }
+body.addin .dims { font-size: 11px; }
+
+body.addin .panel {
+  margin-top: 12px; padding: 14px;
+  grid-template-columns: 1fr; gap: 14px;
+}
+body.addin select, body.addin .fields input { font-size: 14px; padding: 8px 10px; }
+body.addin .sw { width: 22px; height: 22px; }
+
+body.addin .fields { margin-top: 10px; }
+body.addin .fields summary { padding: 10px 14px; }
+body.addin .fields .grid { grid-template-columns: 1fr; padding: 4px 14px 14px; gap: 10px; }
+
+body.addin .foot-note { margin: 16px 2px 0; font-size: 12px; color: var(--muted); }
+
+/* Dark checkerboard so the default white text stays legible while transparent. */
+body.addin .stage[data-bg="checker"] {
+  background-color: #1B2027;
+  background-image:
+    linear-gradient(45deg, #2A313A 25%, transparent 25%, transparent 75%, #2A313A 75%),
+    linear-gradient(45deg, #2A313A 25%, transparent 25%, transparent 75%, #2A313A 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}

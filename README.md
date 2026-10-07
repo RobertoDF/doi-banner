@@ -64,6 +64,37 @@ https://robertodf.github.io/doi-banner/#https%3A%2F%2Felixir-europe.github.io%2F
 - QR generation uses [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
   by Kazuhiko Arase (MIT), vendored in `vendor/`.
 
+## PowerPoint add-in
+
+The same app also runs as a PowerPoint task pane
+(`addin.html`, served from GitHub Pages). It has the same controls as the website and adds
+**Insert into slide**. The banner goes in as SVG when the host supports it
+(`ImageCoercion 1.2`), or as a transparent PNG otherwise. The pane's preview defaults to
+*Transparent*, so inserted banners keep a see-through background.
+
+Install it by sideloading [`manifest.xml`](manifest.xml):
+
+- **PowerPoint for Mac** — copy the manifest into the add-in folder, then restart PowerPoint:
+  ```bash
+  mkdir -p ~/Library/Containers/com.microsoft.Powerpoint/Data/Documents/wef
+  cp manifest.xml ~/Library/Containers/com.microsoft.Powerpoint/Data/Documents/wef/
+  ```
+  Open it from **Home → DOI Banner** (or **Insert → Add-ins → My Add-ins**).
+- **PowerPoint for Windows** — put `manifest.xml` in a folder and share it on the network,
+  for example `\\MACHINE\addins`. In PowerPoint, go to **File → Options → Trust Center → Trust Center Settings →
+  Trusted Add-in Catalogs**. Add that UNC path, tick **Show in Menu**, and restart PowerPoint. Then go to
+  **Insert → My Add-ins → Shared Folder** and pick *DOI / Link Banner*.
+- **PowerPoint on the web** — go to **Insert → Add-ins → My Add-ins → Upload My Add-in**
+  (on some tenants: **Manage My Add-ins**). Choose `manifest.xml`.
+
+To test changes before they reach GitHub Pages, serve the repo over HTTPS and point
+`SourceLocation` and the `Taskpane.Url` resource in a local copy of the manifest at your URL.
+Opened in a normal browser, `addin.html` still renders and downloads, but
+*Insert into slide* is disabled.
+
+**Keynote** has no add-in or plugin API. For Keynote, use the website (or the pane in a
+browser) and drag the downloaded PNG/SVG onto the slide.
+
 ## Running locally
 
 ```bash

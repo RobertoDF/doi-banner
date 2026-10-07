@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<title>DOI / Link Banner — PowerPoint</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/addin.css">
+<link rel="icon" href="assets/icon-32.png">
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body class="addin">
+
+<main>
+  <form id="lookup" class="lookup" autocomplete="off">
+    <label class="sr-only" for="doi">DOI or web link — one per line for several banners</label>
+    <textarea id="doi" name="doi" rows="1" spellcheck="false" autocomplete="off"
+              placeholder="DOI or https://… (one per line)"></textarea>
+    <button type="submit" id="go">Fetch</button>
+  </form>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <section class="actions insert">
+    <button type="button" id="insert" class="primary" disabled>Insert into slide</button>
+  </section>
+
+  <section class="stage-wrap">
+    <div class="stage" id="stage" data-bg="checker">
+      <canvas id="preview"></canvas>
+    </div>
+    <div class="stage-bar">
+      <div class="seg" role="group" aria-label="Background">
+        <button type="button" data-bg="checker" class="on">Transparent</button>
+        <button type="button" data-bg="dark">Dark</button>
+        <button type="button" data-bg="light">Light</button>
+      </div>
+      <span class="dims" id="dims"></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="ctl">
+      <label for="preset">Shape</label>
+      <select autocomplete="off" id="preset">
+        <option value="card" selected>Card</option>
+        <option value="strip">Footer strip</option>
+      </select>
+    </div>
+
+    <div class="ctl">
+      <label for="theme">Text</label>
+      <select autocomplete="off" id="theme">
+        <option value="light" selected>White — dark slides</option>
+        <option value="dark">Near-black — light slides</option>
+      </select>
+    </div>
+
+    <div class="ctl">
+      <label for="typeface">Typeface</label>
+      <select autocomplete="off" id="typeface">
+        <option value="sans" selected>Humanist sans</option>
+        <option value="serif">Serif</option>
+        <option value="grotesk">Neo-grotesque</option>
+      </select>
+    </div>
+
+    <div class="ctl">
+      <label for="accent">Accent</label>
+      <div class="swatches" id="swatches"></div>
+      <input type="color" id="accent" value="#4B8E8D">
+    </div>
+
+    <div class="ctl checks">
+      <label class="chk"><input type="checkbox" id="showQr" checked> QR to target</label>
+      <label class="chk"><input type="checkbox" id="qrPlate"> QR on white plate</label>
+      <label class="chk"><input type="checkbox" id="showRule" checked> Accent rule</label>
+      <label class="chk"><input type="checkbox" id="showDoi" checked> DOI / link line</label>
+    </div>
+  </section>
+
+  <details class="fields" id="fields">
+    <summary>Edit text</summary>
+    <p class="note" id="fieldsNote" hidden>Showing several papers — the fields below edit the first one.</p>
+    <div class="grid">
+      <label>Title <input type="text" autocomplete="off" id="f-title"></label>
+      <label>Authors <input type="text" autocomplete="off" id="f-authors" placeholder="Weinreb, Pearl, Lin"></label>
+      <label>Journal <input type="text" autocomplete="off" id="f-journal"></label>
+      <label>Year <input type="text" autocomplete="off" id="f-year"></label>
+      <label>Volume <input type="text" autocomplete="off" id="f-volume"></label>
+      <label>Pages <input type="text" autocomplete="off" id="f-pages"></label>
+      <label class="wide">Target <input type="text" autocomplete="off" id="f-target" placeholder="DOI or https://…"></label>
+    </div>
+  </details>
+
+  <section class="actions secondary">
+    <button type="button" id="dlPng">Download PNG</button>
+    <button type="button" id="dlSvg">Download SVG</button>
+  </section>
+
+  <p class="foot-note">Metadata from <a href="https://www.crossref.org/" target="_blank" rel="noopener">Crossref</a> /
+    <a href="https://datacite.org/" target="_blank" rel="noopener">DataCite</a>. Runs locally in the pane.</p>
+</main>
+
+<script src="vendor/qrcode.js"></script>
+<script src="js/meta.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+<script src="js/addin.js"></script>
+</body>
+</html>

@@ -169,7 +169,10 @@
     }
 
     const hash = found.map(m => m.kind === 'doi' ? m.doi : m.url).join('\n');
-    history.replaceState(null, '', '#' + encodeURIComponent(hash));
+    // Office.js removes history.replaceState inside the PowerPoint task pane.
+    if (typeof history.replaceState === 'function') {
+      history.replaceState(null, '', '#' + encodeURIComponent(hash));
+    }
     el.go.disabled = false;
   });
 
@@ -241,6 +244,14 @@
     Render.saveSVG(doc, slug() + '.svg', backdrop());
     say('Saved SVG. Fonts are referenced by name, so PNG is safer for sharing.');
   });
+
+  // Shared hooks for other front-ends (e.g. the PowerPoint task pane).
+  window.Banner = {
+    svg: () => doc ? Render.toSVG(doc, backdrop()) : null,
+    pngDataURL: () => doc ? Render.toCanvas(doc, EXPORT_SCALE, null, backdrop()).toDataURL('image/png') : null,
+    size: () => doc ? { width: doc.width, height: doc.height } : null,
+    say
+  };
 
   /* ---- boot ---- */
   metaToFields();
