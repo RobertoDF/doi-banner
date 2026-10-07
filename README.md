@@ -145,12 +145,17 @@ the `#…` deep links described above.
 ## Running locally
 
 ```bash
-git clone https://github.com/dhuzard/doi-link-banner.git
-cd doi-link-banner
+git clone https://github.com/RobertoDF/doi-banner.git
+cd doi-banner
 python3 -m http.server 8000
 ```
 
 Then open <http://localhost:8000>.
+
+## Credits
+
+Generic web-link banners (mixed DOI + URL input) were contributed by
+[Damien Huzard](https://github.com/dhuzard) in [#1](https://github.com/RobertoDF/doi-banner/pull/1).
 
 ## Licence
 
