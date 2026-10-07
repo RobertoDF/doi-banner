@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mock PowerPoint window — store screenshots</title>
+<!--
+  Harness for the Marketplace screenshots (store/screenshots). Not used by the add-in.
+  Serve the repo root (python3 -m http.server) and open /store/mock/powerpoint.html at 1366×768.
+  Query: ?slide=light|dark  &doi=<DOI or URL, URL-encoded>
+  Call window.insertFromPane() to copy the pane's current SVG onto the mock slide.
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font: 13px "Segoe UI", -apple-system, system-ui, sans-serif; color: #252423;
+         background: #F3F2F1; display: grid; grid-template-rows: 32px 30px 92px 1fr 24px; }
+  .title { background: #C43E1C; color: #fff; display: flex; align-items: center; justify-content: center;
+           font-size: 12px; position: relative; }
+  .title .dots { position: absolute; left: 12px; display: flex; gap: 8px; }
+  .title .dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,.35); display: block; }
+  .tabs { background: #C43E1C; display: flex; align-items: flex-end; gap: 2px; padding-left: 12px; }
+  .tabs span { color: #fff; padding: 6px 14px; font-size: 13px; opacity: .9; }
+  .tabs span.on { background: #F3F2F1; color: #C43E1C; border-radius: 4px 4px 0 0; opacity: 1; font-weight: 600; }
+  .ribbon { background: #F3F2F1; border-bottom: 1px solid #E1DFDD; display: flex; padding: 8px 12px; }
+  .grp { display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+         padding: 0 14px; border-right: 1px solid #E1DFDD; min-width: 70px; }
+  .grp .btns { display: flex; gap: 10px; align-items: flex-start; }
+  .grp .b { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; width: 62px; text-align: center; }
+  .grp .b .ic { width: 32px; height: 32px; border-radius: 4px; background: #D2D0CE; }
+  .grp .b.addin { background: #E1DFDD; border-radius: 4px; padding: 4px 0; }
+  .grp .b.addin img { width: 32px; height: 32px; }
+  .grp .lbl { font-size: 11px; color: #605E5C; }
+  .work { display: grid; grid-template-columns: 150px 1fr 336px; min-height: 0; }
+  .thumbs { padding: 14px 10px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid #E1DFDD; }
+  .thumb { aspect-ratio: 16/9; background: #fff; border: 1px solid #C8C6C4; border-radius: 2px; }
+  .thumb.on { outline: 2px solid #C43E1C; outline-offset: 2px; }
+  .thumb.dark { background: #1F2630; }
+  .canvas { display: flex; align-items: center; justify-content: center; padding: 22px; min-width: 0; background: #E6E6E6; }
+  .slide { width: 100%; max-width: 820px; aspect-ratio: 16/9; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.18);
+           position: relative; overflow: hidden; padding: 6% 7%; }
+  .slide.dark { background: #1F2630; color: #F2F4F7; }
+  .slide h2 { margin: 0 0 4%; font: 600 30px "Segoe UI", system-ui, sans-serif; letter-spacing: -.01em; }
+  .slide ul { margin: 0; padding-left: 22px; font-size: 17px; line-height: 1.6; opacity: .85; }
+  .slide .inserted { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); width: 80%;
+                     outline: 1.5px solid #C43E1C; outline-offset: 3px; }
+  .pane { background: #fff; border-left: 1px solid #E1DFDD; display: grid; grid-template-rows: 40px 1fr; min-height: 0; }
+  .pane header { display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 14px;
+                 font-size: 15px; font-weight: 600; border-bottom: 1px solid #EDEBE9; }
+  .pane header span { color: #605E5C; font-weight: 400; font-size: 18px; }
+  .pane iframe { border: 0; width: 100%; height: 100%; }
+  .status { background: #F3F2F1; border-top: 1px solid #E1DFDD; font-size: 11px; color: #605E5C;
+            display: flex; align-items: center; padding: 0 12px; gap: 18px; }
+</style>
+</head>
+<body>
+  <div class="title"><div class="dots"><i></i><i></i><i></i></div>Methods talk — PowerPoint</div>
+  <div class="tabs"><span>File</span><span class="on">Home</span><span>Insert</span><span>Design</span><span>Transitions</span><span>Animations</span><span>Slide Show</span><span>Review</span><span>View</span></div>
+  <div class="ribbon">
+    <div class="grp"><div class="btns"><div class="b"><div class="ic"></div>Paste</div></div><div class="lbl">Clipboard</div></div>
+    <div class="grp"><div class="btns"><div class="b"><div class="ic"></div>New Slide</div><div class="b"><div class="ic"></div>Layout</div></div><div class="lbl">Slides</div></div>
+    <div class="grp"><div class="btns"><div class="b"><div class="ic"></div>Font</div><div class="b"><div class="ic"></div>Paragraph</div></div><div class="lbl">Font</div></div>
+    <div class="grp"><div class="btns"><div class="b"><div class="ic"></div>Shapes</div><div class="b"><div class="ic"></div>Arrange</div></div><div class="lbl">Drawing</div></div>
+    <div class="grp"><div class="btns"><div class="b addin"><img src="../../assets/icon-32.png" alt="">DOI Banner</div></div><div class="lbl">DOI Banner</div></div>
+  </div>
+  <div class="work">
+    <div class="thumbs">
+      <div class="thumb"></div>
+      <div class="thumb on" id="thumb"></div>
+      <div class="thumb"></div>
+      <div class="thumb"></div>
+    </div>
+    <div class="canvas">
+      <div class="slide" id="slide">
+        <h2>Imaging pipeline</h2>
+        <ul>
+          <li>Two-photon recordings, 30 Hz, 4 planes</li>
+          <li>Motion correction and ROI detection</li>
+          <li>Spike inference and tuning analysis</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="pane">
+      <header>DOI / Link Banner <span>×</span></header>
+      <iframe id="pane" title="Task pane"></iframe>
+    </aside>
+  </div>
+  <div class="status"><span>Slide 2 of 4</span><span>English (United States)</span></div>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  const slide = document.getElementById('slide');
+  if (q.get('slide') === 'dark') { slide.classList.add('dark'); document.getElementById('thumb').classList.add('dark'); }
+  const pane = document.getElementById('pane');
+  pane.src = '../../addin.html' + (q.get('doi') ? '?doi=' + encodeURIComponent(q.get('doi')) : '');
+
+  window.insertFromPane = () => {
+    const svg = pane.contentWindow.Banner.svg();
+    const img = new Image();
+    img.className = 'inserted';
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    slide.querySelectorAll('.inserted').forEach(n => n.remove());
+    slide.appendChild(img);
+    pane.contentWindow.Banner.say('Inserted as SVG.');
+  };
+</script>
+</body>
+</html>

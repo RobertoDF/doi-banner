@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy — DOI / Link Banner</title>
+<meta name="description" content="Privacy policy for the DOI / Link Banner website and PowerPoint add-in.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="icon" href="assets/icon-32.png">
+</head>
+<body>
+<header class="masthead doc-head">
+  <h1><a href="./" style="color:inherit">DOI / Link&thinsp;<span>Banner</span></a></h1>
+  <p>Privacy policy</p>
+</header>
+<main class="doc">
+<p class="meta">Last updated: 8 October 2026. Applies to the DOI / Link Banner website
+(<a href="https://robertodf.github.io/doi-banner/">robertodf.github.io/doi-banner</a>), the
+<strong>DOI / Link Banner add-in for Microsoft PowerPoint</strong>, and the Keynote helper script in the
+<a href="https://github.com/RobertoDF/doi-banner">source repository</a>.</p>
+
+<h2>Summary</h2>
+<p>DOI / Link Banner turns a DOI or web link into an image banner for slides. It runs entirely in your
+browser or in the PowerPoint task pane. <strong>We do not collect, store, sell or share any personal
+information.</strong> There are no accounts, no cookies, no analytics, no advertising and no server of ours
+that receives your data.</p>
+
+<h2>What happens to what you type</h2>
+<ul>
+  <li><strong>DOIs</strong> are sent directly from your browser to the public metadata services that
+    answer them: <a href="https://www.crossref.org/">Crossref</a> (<code>api.crossref.org</code>), and if Crossref has no
+    record, <a href="https://datacite.org/">DataCite</a> (<code>api.datacite.org</code>) and <code>doi.org</code>.
+    Only the DOI is sent. Those services see your IP address like any website you visit, and they handle it under
+    their own privacy policies.</li>
+  <li><strong>Web links</strong> are not fetched or sent anywhere. The banner and its QR code are built
+    locally from the text you entered.</li>
+  <li><strong>Edited text, settings and generated images</strong> stay in the page's memory. They are
+    discarded when you close the page or task pane. Nothing is written to cookies or local storage.</li>
+</ul>
+
+<h2>PowerPoint add-in</h2>
+<ul>
+  <li>The add-in requests permission to <em>write</em> to the document. It uses this only when you press
+    <strong>Insert into slide</strong>, to place the banner image at your current selection. It does not read
+    your presentation's content.</li>
+  <li>Microsoft's Office JavaScript library is loaded from Microsoft's CDN
+    (<code>appsforoffice.microsoft.com</code>), as required for all Office add-ins. Its use is covered by the
+    <a href="https://privacy.microsoft.com/privacystatement">Microsoft Privacy Statement</a>.</li>
+</ul>
+
+<h2>Clipboard, downloads and the Keynote script</h2>
+<p><strong>Copy image</strong> and the download buttons only act when you click them. The image goes to
+your clipboard or your downloads folder. The optional Keynote AppleScript runs on your Mac: it reads the image
+from your clipboard and places it on the current Keynote slide, and sends nothing over the network.</p>
+
+<h2>Hosting</h2>
+<p>The website and the add-in's pages are static files hosted on GitHub Pages. GitHub may log technical
+data such as IP addresses when serving them; see the
+<a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub
+Privacy Statement</a>. We have no access to those logs.</p>
+
+<h2>Children</h2>
+<p>The service collects no personal information from anyone, including children.</p>
+
+<h2>Changes and contact</h2>
+<p>Changes to this policy are published on this page and in the
+<a href="https://github.com/RobertoDF/doi-banner/commits/master/privacy.html">repository history</a>.
+Questions go to <a href="support.html">support</a>.</p>
+</main>
+<footer class="foot doc-foot">
+  <p><a href="./">DOI / Link Banner</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="support.html">Support</a> · <a href="https://github.com/RobertoDF/doi-banner">Source on GitHub</a></p>
+</footer>
+</body>
+</html>

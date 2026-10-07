@@ -5,24 +5,29 @@
            xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
            xsi:type="TaskPaneApp">
   <Id>11bfdd48-2c7d-454e-9fb4-ba0abe3bc29e</Id>
-  <Version>1.0.0.0</Version>
-  <ProviderName>RobertoDF</ProviderName>
+  <Version>1.1.0.0</Version>
+  <ProviderName>Roberto De Filippo</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="DOI / Link Banner"/>
-  <Description DefaultValue="Paste a DOI or web link and insert a transparent, QR-enabled resource banner into your slide."/>
+  <Description DefaultValue="Turn a DOI or web link into a citation banner with title, authors, journal and QR code, and insert it into your slide as a transparent image."/>
   <IconUrl DefaultValue="https://robertodf.github.io/doi-banner/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://robertodf.github.io/doi-banner/assets/icon-64.png"/>
-  <SupportUrl DefaultValue="https://github.com/RobertoDF/doi-banner"/>
+  <SupportUrl DefaultValue="https://robertodf.github.io/doi-banner/support.html"/>
   <AppDomains>
     <AppDomain>https://robertodf.github.io</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Presentation"/>
   </Hosts>
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="ImageCoercion" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
   <DefaultSettings>
     <SourceLocation DefaultValue="https://robertodf.github.io/doi-banner/addin.html"/>
   </DefaultSettings>
-  <Permissions>ReadWriteDocument</Permissions>
+  <Permissions>WriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Hosts>
       <Host xsi:type="Presentation">
@@ -70,7 +75,7 @@
         <bt:Image id="Icon.80x80" DefaultValue="https://robertodf.github.io/doi-banner/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/RobertoDF/doi-banner"/>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://robertodf.github.io/doi-banner/support.html"/>
         <bt:Url id="Taskpane.Url" DefaultValue="https://robertodf.github.io/doi-banner/addin.html"/>
       </bt:Urls>
       <bt:ShortStrings>

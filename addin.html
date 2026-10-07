@@ -11,12 +11,22 @@
 <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 </head>
 <body class="addin">
+<div id="legacy" class="legacy" hidden>
+  <strong>This browser engine is not supported.</strong>
+  DOI / Link Banner needs PowerPoint for Microsoft 365, PowerPoint 2021 or later, PowerPoint for Mac or
+  PowerPoint on the web. You can still make banners at
+  <a href="https://robertodf.github.io/doi-banner/" target="_blank" rel="noopener">robertodf.github.io/doi-banner</a>.
+</div>
+<script>
+  // Old perpetual Office on Windows hosts add-ins in Internet Explorer 11, which can't run the ES2017+ code below.
+  if (/Trident\/|MSIE /.test(navigator.userAgent)) { document.getElementById('legacy').hidden = false; document.body.className += ' legacy-host'; }
+</script>
 
 <main>
   <form id="lookup" class="lookup" autocomplete="off">
     <label class="sr-only" for="doi">DOI or web link — one per line for several banners</label>
     <textarea id="doi" name="doi" rows="1" spellcheck="false" autocomplete="off"
-              placeholder="DOI or https://… (one per line)"></textarea>
+              placeholder="DOI or link, one per line"></textarea>
     <button type="submit" id="go">Fetch</button>
   </form>
   <p id="status" class="status" role="status" aria-live="polite"></p>
@@ -100,7 +110,9 @@
   </section>
 
   <p class="foot-note">Metadata from <a href="https://www.crossref.org/" target="_blank" rel="noopener">Crossref</a> /
-    <a href="https://datacite.org/" target="_blank" rel="noopener">DataCite</a>. Runs locally in the pane.</p>
+    <a href="https://datacite.org/" target="_blank" rel="noopener">DataCite</a>. No data collected.
+    <a href="privacy.html" target="_blank" rel="noopener">Privacy</a> ·
+    <a href="support.html" target="_blank" rel="noopener">Help</a></p>
 </main>
 
 <script src="vendor/qrcode.js"></script>
