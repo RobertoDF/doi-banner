@@ -21,6 +21,7 @@
   Office.onReady(info => {
     if (info && info.host === Office.HostType.PowerPoint) {
       ready = true;
+      document.body.classList.add('in-office');
       btn.disabled = false;
       btn.title = '';
     } else {
@@ -68,7 +69,7 @@
       await setData(png, Office.CoercionType.Image);
       say('Inserted as PNG.');
     } catch (e) {
-      say('Could not insert: ' + e.message, true);
+      say('Could not insert: ' + e.message + ' Click inside a slide (Normal view) and try again.', true);
     } finally {
       btn.disabled = false;
     }

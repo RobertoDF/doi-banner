@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support — DOI / Link Banner</title>
+<meta name="description" content="Help and support for the DOI / Link Banner website and PowerPoint add-in.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="icon" href="assets/icon-32.png">
+</head>
+<body>
+<header class="masthead doc-head">
+  <h1><a href="./" style="color:inherit">DOI / Link&thinsp;<span>Banner</span></a></h1>
+  <p>Support</p>
+</header>
+<main class="doc">
+<h2>Get help or report a problem</h2>
+<ul>
+  <li><strong>Open an issue:</strong>
+    <a href="https://github.com/RobertoDF/doi-banner/issues/new">github.com/RobertoDF/doi-banner/issues</a>.
+    Include the DOI or link you used, your app (PowerPoint for Windows, Mac or the web, or a browser) and
+    what you saw. A free GitHub account is needed to post.</li>
+  <li><strong>Contact the maintainer:</strong> Roberto De Filippo,
+    <a href="https://github.com/RobertoDF">github.com/RobertoDF</a>.</li>
+  <li><strong>Existing answers:</strong> <a href="https://github.com/RobertoDF/doi-banner/issues?q=is%3Aissue">search
+    open and closed issues</a> and the <a href="https://github.com/RobertoDF/doi-banner#readme">README</a>.</li>
+</ul>
+
+<h2>Using the PowerPoint add-in</h2>
+<ol>
+  <li>Click <strong>Home → DOI Banner</strong> to open the task pane.</li>
+  <li>Paste a DOI (for example <code>10.1038/s41592-024-02318-2</code>) or a web link, then click
+    <strong>Fetch</strong>. Put several on separate lines to stack them into one image.</li>
+  <li>Adjust the shape, text colour, typeface, accent or QR options, or open <em>Edit text</em> to change any field.</li>
+  <li>Select a slide, then click <strong>Insert into slide</strong>. The banner is inserted as a vector image
+    (SVG) where PowerPoint supports it, or as a transparent PNG otherwise.</li>
+</ol>
+
+<h2>Common problems</h2>
+<ul>
+  <li><strong>“DOI not found”</strong> — check the DOI. Some publishers register only with DataCite or not
+    at all. You can still type the details yourself under <em>Edit text</em>.</li>
+  <li><strong>Insert does nothing, or reports an error</strong> — click inside a slide in Normal view, not
+    the slide sorter or outline, and try again.</li>
+  <li><strong>The button says to open the page inside PowerPoint</strong> — the page is open in a normal
+    browser. Use Download PNG / SVG or Copy image there.</li>
+  <li><strong>Text colour</strong> — choose <em>Near-black</em> for light slides and <em>White</em> for
+    dark ones. The <em>Transparent</em> background keeps the slide visible behind the banner.</li>
+  <li><strong>Keynote</strong> — Keynote has no add-in API. Use <em>Copy image</em> on the website and the
+    helper script described in the <a href="https://github.com/RobertoDF/doi-banner#keynote">README</a>.</li>
+</ul>
+
+<h2>Privacy and terms</h2>
+<p>No personal data is collected. See the <a href="privacy.html">privacy policy</a> and the
+<a href="terms.html">terms of use</a>.</p>
+</main>
+<footer class="foot doc-foot">
+  <p><a href="./">DOI / Link Banner</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="support.html">Support</a> · <a href="https://github.com/RobertoDF/doi-banner">Source on GitHub</a></p>
+</footer>
+</body>
+</html>

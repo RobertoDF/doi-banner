@@ -18,7 +18,7 @@ body.addin .actions.secondary button { flex: 1 1 0; font-size: 13px; }
 body.addin .stage-wrap { margin-top: 12px; }
 body.addin .stage { padding: 10px; }
 body.addin .stage-bar { flex-wrap: wrap; gap: 6px; }
-body.addin .seg button { padding: 6px 9px; font-size: 12px; }
+body.addin .seg button { padding: 8px 10px; font-size: 12px; min-height: 32px; }
 body.addin .dims { font-size: 11px; }
 
 body.addin .panel {
@@ -26,13 +26,24 @@ body.addin .panel {
   grid-template-columns: 1fr; gap: 14px;
 }
 body.addin select, body.addin .fields input { font-size: 14px; padding: 8px 10px; }
-body.addin .sw { width: 22px; height: 22px; }
+body.addin .swatches { gap: 5px; }
+body.addin .sw { width: 26px; height: 26px; padding: 0; }
 
 body.addin .fields { margin-top: 10px; }
 body.addin .fields summary { padding: 10px 14px; }
 body.addin .fields .grid { grid-template-columns: 1fr; padding: 4px 14px 14px; gap: 10px; }
 
-body.addin .foot-note { margin: 16px 2px 0; font-size: 12px; color: var(--muted); }
+body.addin .foot-note { margin: 16px 2px 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* Inside PowerPoint, Insert is the action; downloads are unreliable in Office webviews. */
+body.addin.in-office .actions.secondary { display: none; }
+
+body.addin .legacy {
+  margin: 12px; padding: 12px 14px; border-radius: 8px;
+  background: #FFF4E5; color: #5C3B00; font-size: 13px; line-height: 1.45;
+}
+body.addin .legacy a { color: #7A3E00; }
+body.addin.legacy-host main { display: none; }
 
 /* Dark checkerboard so the default white text stays legible while transparent. */
 body.addin .stage[data-bg="checker"] {

@@ -95,6 +95,17 @@ To test changes before they reach GitHub Pages, serve the repo over HTTPS and po
 Opened in a normal browser, `addin.html` still renders and downloads, but
 *Insert into slide* is disabled.
 
+The add-in needs PowerPoint for Microsoft 365 or 2021+ on Windows, PowerPoint for Mac, or
+PowerPoint on the web. Older Windows builds that host add-ins in Internet Explorer show a
+"not supported" notice. It asks only for `WriteDocument` permission and never reads the
+presentation.
+
+**Microsoft Marketplace.** Store assets (logo, screenshots, listing text, reviewer notes) and a
+step-by-step Partner Center guide are in [`store/`](store/SUBMISSION.md). The public
+[privacy policy](https://robertodf.github.io/doi-banner/privacy.html),
+[terms](https://robertodf.github.io/doi-banner/terms.html) and
+[support](https://robertodf.github.io/doi-banner/support.html) pages are served from this repo.
+
 ## Keynote
 
 Keynote has no add-in or plugin API. Instead, use the clipboard and a small AppleScript:
@@ -154,4 +165,5 @@ Then open <http://localhost:8000>.
 
 ## Licence
 
-MIT.
+MIT. See also the [terms of use](https://robertodf.github.io/doi-banner/terms.html) and
+[privacy policy](https://robertodf.github.io/doi-banner/privacy.html): no data is collected.
