@@ -27,7 +27,8 @@ Built for talks: use the same visual treatment for papers and web resources. DOI
   stacked into a single image — handy for a references slide or a
   “building on” slide. Up to 12 per run; a DOI that fails to resolve is
   reported and the rest are still drawn.
-- Exports **PNG** (at 2×, so it stays crisp on a projector) or **SVG**. The
+- Exports **PNG** (at 2×, so it stays crisp on a projector) or **SVG**, or
+  **copies the PNG** to the clipboard for pasting into Keynote, Google Slides and other apps. The
   preview backdrop is what you get: transparent, dark or light.
   Picking a dark or light backdrop flips the text colour to match.
 - Everything runs in the browser. Nothing is uploaded, no build step, no
@@ -52,6 +53,8 @@ https://robertodf.github.io/doi-banner/#10.1038/s41592-024-02318-2
 ```
 
 For multiple or mixed resources, the app stores the encoded list in the hash.
+Query parameters work too: `?doi=10.1038/s41592-024-02318-2` or `?target=https://…` (repeat
+them for several resources).
 
 ```
 https://robertodf.github.io/doi-banner/#https%3A%2F%2Felixir-europe.github.io%2Fds-handbook%2F
@@ -92,8 +95,52 @@ To test changes before they reach GitHub Pages, serve the repo over HTTPS and po
 Opened in a normal browser, `addin.html` still renders and downloads, but
 *Insert into slide* is disabled.
 
-**Keynote** has no add-in or plugin API. For Keynote, use the website (or the pane in a
-browser) and drag the downloaded PNG/SVG onto the slide.
+## Keynote
+
+Keynote has no add-in or plugin API. Instead, use the clipboard and a small AppleScript:
+
+1. On the website, click **Copy image**. This copies the PNG at download resolution (2×), with a
+   transparent background if *Transparent* is selected. If the browser can't copy images, it
+   downloads the PNG instead.
+2. Press your keyboard shortcut. [`keynote/insert-banner.applescript`](keynote/insert-banner.applescript)
+   places the clipboard image on the current slide of the front Keynote document. It is centred,
+   near the bottom, and about 80% of the slide width. If Keynote isn't open, no presentation is
+   open, or there is no image on the clipboard, it shows a dialog.
+
+You can also just paste (⌘V) into Keynote. The script saves you resizing and positioning the image.
+
+### Install as a Shortcut (recommended)
+
+1. Open **Shortcuts** and create a new shortcut, for example *Insert DOI Banner*.
+2. Add a **Run AppleScript** action, and replace its contents with the contents of
+   `keynote/insert-banner.applescript`.
+3. In the shortcut's details (ⓘ), turn on **Use as Quick Action** / **Pin in Menu Bar** if you
+   want them, and click **Add Keyboard Shortcut** (for example ⌃⌥⌘B).
+4. On the first run, macOS asks whether Shortcuts may control Keynote. Click **OK**. If you
+   denied it earlier, turn it on under **System Settings → Privacy & Security → Automation →
+   Shortcuts → Keynote**.
+
+### Or install in the Script Menu
+
+```bash
+mkdir -p ~/Library/Scripts/Applications/Keynote
+osacompile -o ~/Library/Scripts/Applications/Keynote/"Insert DOI Banner.scpt" keynote/insert-banner.applescript
+```
+
+Turn on the menu under **Script Editor → Settings → General → Show Script menu in menu bar**.
+The script then appears in the menu bar whenever Keynote is in front. The Script Menu can't
+assign a keyboard shortcut, so use the Shortcuts route if you want one. Automation permission
+is granted in the same way, under the **Script Menu** (or `osascript`) entry.
+
+### Optional: “New banner from DOI” shortcut
+
+In Shortcuts, create a shortcut with three actions: **Ask for Input** (Text, prompt “DOI or link”) →
+**URL Encode** → **Open URLs** with
+`https://robertodf.github.io/doi-banner/?doi=` followed by the *URL Encoded Text* variable.
+The site opens with the banner already built. Click **Copy image**, then run *Insert DOI Banner*.
+
+The site accepts `?doi=…` and `?target=…` (repeatable, for several resources) as well as
+the `#…` deep links described above.
 
 ## Running locally
 
